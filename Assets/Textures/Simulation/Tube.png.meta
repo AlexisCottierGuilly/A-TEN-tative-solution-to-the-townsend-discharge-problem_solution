@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: e22461ee9da5f484eaddcdc8a385c972
+guid: 5584f4f8c193ea944b9ec145179d9bc6
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 5170280440027339912
-    second: burst4b_0
+      213: -127744156057749641
+    second: Tube_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -100,13 +100,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: burst4b_0
+      name: Tube_0
       rect:
         serializedVersion: 2
-        x: 1
-        y: 1
-        width: 30
-        height: 30
+        x: 0
+        y: 0
+        width: 256
+        height: 128
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -115,8 +115,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 88cdaf8baa680c740800000000000000
-      internalID: 5170280440027339912
+      spriteID: 777bb0ced592a3ef0800000000000000
+      internalID: -127744156057749641
       vertices: []
       indices: 
       edges: []
@@ -135,7 +135,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      burst4b_0: 5170280440027339912
+      Tube_0: -127744156057749641
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

@@ -120,8 +120,6 @@ public class GraphGenerator : MonoBehaviour
             step = optimalStep;
         }
 
-        Debug.Log($"Range: {range}, Step: {step}");
-
         return new Vector2(min, min + step * (graduationCount - 1));
     }
 
