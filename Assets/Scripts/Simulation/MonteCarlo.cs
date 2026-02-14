@@ -82,7 +82,7 @@ class PCG
 
 }
 
-public class MonteCarloSim : MonoBehaviour
+public class MonteCarlo : MonoBehaviour
 {
     // SECTION: Simulation parameters
     public uint    maxCollisions = (uint)10e6; // number of collisions to simulate for each electron
@@ -210,7 +210,7 @@ public class MonteCarloSim : MonoBehaviour
         return e;
     }
 
-    List<Vector3> collisionPoints; // list to store collision points for visualization
+    public List<Vector3> collisionPoints; // list to store collision points for visualization
     void SimulateElectron()
     {
         GetCollisionData();
