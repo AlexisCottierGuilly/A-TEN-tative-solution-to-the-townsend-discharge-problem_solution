@@ -56,9 +56,11 @@ public class TextureRenderer : MonoBehaviour
         }
         
         //Texture2D texture = TextureFromParticleMap(map);
+        
         List<List<float>> grid = GetGridFromParticleMap(map, gridSize);
-
         Texture2D texture = TextureFromGrid(grid, new Vector2(map.width, map.height));
+
+        //Texture2D texture = TextureFromParticles(map);
         testPreview = GetTextureGO(texture, parent: this.transform, previewSize: previewSize, offset: offset);
     }
 
@@ -71,6 +73,51 @@ public class TextureRenderer : MonoBehaviour
         textureGO.transform.localScale = new Vector2(previewSize.x / texture.width, previewSize.y / texture.height);
         textureGO.transform.localPosition = offset;
         return textureGO;
+    }
+
+    public Texture2D TextureFromParticles(ParticleMap map)
+    {
+        Texture2D texture = new Texture2D(map.width, map.height, TextureFormat.RGBA32, false);
+        texture.filterMode = FilterMode.Point;
+        texture.wrapMode = TextureWrapMode.Clamp;
+
+        Color[] pixels = new Color[map.width * map.height];
+        for (int i = 0; i < pixels.Length; i++)
+        {
+            pixels[i] = Color.black;
+        }
+
+        texture.SetPixels(pixels);
+
+        foreach (Vector2 particlePos in map.particlePositions)
+        {
+            int x = Mathf.Clamp(Mathf.RoundToInt(particlePos.x), 0, map.width - 1);
+            int y = Mathf.Clamp(Mathf.RoundToInt(particlePos.y), 0, map.height - 1);
+            BlurPoint(x, y, texture);
+        }
+
+        texture.Apply();
+        return texture;
+    }
+
+    public void BlurPoint(float x, float y, Texture2D texture)
+    {
+        Color mainColor = Color.white;
+        Color secondaryColor = Color.grey;
+
+        texture.SetPixel((int)x, (int)y, mainColor);
+        
+        Color neighbour1 = texture.GetPixel((int)x + 1, (int)y);
+        texture.SetPixel((int)x + 1, (int)y, neighbour1 + secondaryColor);
+
+        Color neighbour2 = texture.GetPixel((int)x - 1, (int)y);
+        texture.SetPixel((int)x - 1, (int)y, neighbour2 + secondaryColor);
+
+        Color neighbour3 = texture.GetPixel((int)x, (int)y + 1);
+        texture.SetPixel((int)x, (int)y + 1, neighbour3 + secondaryColor);
+
+        Color neighbour4 = texture.GetPixel((int)x, (int)y - 1);
+        texture.SetPixel((int)x, (int)y - 1, neighbour4 + secondaryColor);
     }
 
     public Texture2D TextureFromParticleMap(ParticleMap map, bool pixelPerfect = true, bool distorsion = false)

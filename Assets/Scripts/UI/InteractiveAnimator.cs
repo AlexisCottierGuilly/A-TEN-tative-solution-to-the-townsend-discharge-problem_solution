@@ -33,6 +33,8 @@ public class InteractiveAnimator : MonoBehaviour
     private Vector2 neon3StartPos;
     private Vector2 neon4StartPos;
 
+    private float initialAnimationSpeed;
+
     void Start()
     {
         electron1StartPos = electron1.transform.localPosition;
@@ -40,18 +42,29 @@ public class InteractiveAnimator : MonoBehaviour
         neon2StartPos = neon2.transform.localPosition;
         neon3StartPos = neon3.transform.localPosition;
         neon4StartPos = neon4.transform.localPosition;
+
+        initialAnimationSpeed = animationSpeed;
     }
 
     void Update()
     {
         if (Input.GetKeyDown(KeyCode.Space))
         {
+            ResetAnimation();
             Animate();
         }
         if (Input.GetKeyDown(KeyCode.R))
         {
             ResetAnimation();
         }
+    }
+
+    public void AnimationSpeedToggled()
+    {
+        if (animationSpeed == initialAnimationSpeed)
+            animationSpeed /= 3f;
+        else
+            animationSpeed = initialAnimationSpeed;
     }
 
     public void ResetAnimation()
@@ -83,10 +96,10 @@ public class InteractiveAnimator : MonoBehaviour
 
     public IEnumerator AnimateSequence()
     {
-        StartCoroutine(AnimateVibration(neon1, amplitude: 0.05f, frequency: 3f, duration: 10f / animationSpeed));
-        StartCoroutine(AnimateVibration(neon2, amplitude: 0.05f, frequency: 2.8f, duration: 10f / animationSpeed));
-        StartCoroutine(AnimateVibration(neon3, amplitude: 0.05f, frequency: 3.2f, duration: 10f / animationSpeed));
-        StartCoroutine(AnimateVibration(neon4, amplitude: 0.05f, frequency: 3.3f, duration: 10f / animationSpeed));
+        StartCoroutine(AnimateVibration(neon1, amplitude: 0.05f, frequency: 3f, duration: 100000f / animationSpeed));
+        StartCoroutine(AnimateVibration(neon2, amplitude: 0.05f, frequency: 2.8f, duration: 100000f / animationSpeed));
+        StartCoroutine(AnimateVibration(neon3, amplitude: 0.05f, frequency: 3.2f, duration: 100000f / animationSpeed));
+        StartCoroutine(AnimateVibration(neon4, amplitude: 0.05f, frequency: 3.3f, duration: 100000f / animationSpeed));
 
         yield return AnimateMovement(electron1, new Vector2(11.3f, 0f), 15f * animationSpeed);
         yield return AnimateMovement(electron1, new Vector2(1.15f, 2.6f), 15f * animationSpeed);
