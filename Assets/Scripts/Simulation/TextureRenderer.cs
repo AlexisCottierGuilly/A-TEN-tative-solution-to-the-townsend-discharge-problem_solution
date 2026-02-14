@@ -66,7 +66,7 @@ public class TextureRenderer : MonoBehaviour
                     if (map.typeColors.ContainsKey(type))
                     {
                         colors.Add(map.typeColors[type]);
-                        weights.Add(1f / (distance / 5f + 1f)); // weight inversely proportional to distance
+                        weights.Add(1f / Mathf.Pow(distance / 5f + 1f, 2f)); // weight inversely proportional to distance
                     }
                 }
                 Color finalColor = BlendColors(colors, weights);
