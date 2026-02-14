@@ -1617,6 +1617,37 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 528994993}
   m_CullTransparentMesh: 1
+--- !u!1 &551744798
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 551744799}
+  m_Layer: 0
+  m_Name: Lines
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &551744799
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 551744798}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1094426902}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &751996722
 GameObject:
   m_ObjectHideFlags: 0
@@ -2073,14 +2104,16 @@ Transform:
   m_LocalScale: {x: 3, y: 3, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 937665573}
   - {fileID: 2137282879}
   - {fileID: 1013552874}
   - {fileID: 1760180057}
   - {fileID: 1788470642}
   - {fileID: 816211839}
   - {fileID: 751996723}
+  - {fileID: 551744799}
   - {fileID: 1850441390}
+  - {fileID: 937665573}
+  - {fileID: 1933782365}
   m_Father: {fileID: 27906615}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1094426903
@@ -2120,6 +2153,7 @@ MonoBehaviour:
   - {fileID: 78705732}
   axes: {fileID: 2137282879}
   dotsParent: {fileID: 1850441390}
+  linesParent: {fileID: 551744799}
 --- !u!1 &1159676489
 GameObject:
   m_ObjectHideFlags: 0
@@ -3384,6 +3418,78 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1869352665}
   m_CullTransparentMesh: 1
+--- !u!1 &1933782364
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1933782365}
+  - component: {fileID: 1933782367}
+  - component: {fileID: 1933782366}
+  m_Layer: 0
+  m_Name: LineTemplate
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 0
+--- !u!224 &1933782365
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1933782364}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1094426902}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 10, y: 2.5}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &1933782366
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1933782364}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1344c3c82d62a2a41a3576d8abb8e3ea, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.RawImage
+  m_Material: {fileID: 0}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_RaycastTarget: 1
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  m_Texture: {fileID: 2800000, guid: 28db69b879e426e42b339c196db531c8, type: 3}
+  m_UVRect:
+    serializedVersion: 2
+    x: 0
+    y: 0
+    width: 1
+    height: 1
+--- !u!222 &1933782367
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1933782364}
+  m_CullTransparentMesh: 1
 --- !u!1 &1937617460
 GameObject:
   m_ObjectHideFlags: 0
@@ -3567,13 +3673,17 @@ MonoBehaviour:
   m_EditorClassIdentifier: '::'
   graphTemplate: {fileID: 1094426901}
   dotTemplate: {fileID: 937665572}
+  lineTemplate: {fileID: 1933782364}
   graphParent: {fileID: 27906615}
   enableTest: 1
   testData:
+    title: "Graphique 1 : temp\xE9rature selon la journ\xE9e"
+    labelX: Jour
+    labelY: "Temp\xE9rature"
     dataX:
     - 0
     - 34
-    - 45
+    - 43
     - 12
     - 17.5
     - 22
@@ -3584,7 +3694,7 @@ MonoBehaviour:
     dataY:
     - 0
     - 5
-    - 1
+    - 3
     - 2
     - 3.7
     - 1.2
@@ -3592,9 +3702,6 @@ MonoBehaviour:
     - 2.2
     - 4.8
     - 5
-    title: "Graphique 1 : temp\xE9rature selon la journ\xE9e"
-    labelX: Jour
-    labelY: "Temp\xE9rature"
 --- !u!1 &1957639133
 GameObject:
   m_ObjectHideFlags: 0

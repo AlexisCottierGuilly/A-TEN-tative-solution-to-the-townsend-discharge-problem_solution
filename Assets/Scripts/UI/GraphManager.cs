@@ -16,6 +16,7 @@ public class GraphManager : MonoBehaviour
     [Space]
     public RectTransform axes;
     public Transform dotsParent;
+    public Transform linesParent;
 
     public void SetTitle(string title) { graphTitle.text = title; }
     public void SetLabelX(string label) { labelX.text = label; }
