@@ -44,7 +44,7 @@ struct Collision
     }
 }
 
-struct Electron
+public struct Electron
 {
     public Vector3 position; // position in m
     public Vector3 velocity; // velocity in m/s
@@ -92,7 +92,7 @@ public class MonteCarlo : MonoBehaviour
     // SECTION: Simulation parameters
     public uint    maxCollisions = (uint)10e6; // number of collisions to simulate for each electron
     public int    numElectrons = 1000; // number of electrons to simulate
-    public float reducedEfield = 100; // efield in z-direction in Td
+    public float reducedEfield = 100; // efield in x-direction in Td
     public float distance = 0.01f; // distance between plates in m
     public float pressure = 10f; // pressure of neon in Torr
     public float diameter = 0.05f; // diameter of the simulation region in m
@@ -190,33 +190,30 @@ public class MonteCarlo : MonoBehaviour
     // SECTION: Simulation
     PCG rng; 
 
-    Vector3 ScatterElectron(Electron e)
-    {
-        //scatter electron isotropically
-        float costheta = 1 - 2 * rng.RandomFloat(); // random cosine of polar angle
-        float sintheta = Mathf.Sqrt(1 - costheta * costheta);
-        float phi = rng.RandomFloat() * 2 * Mathf.PI; // random xy angle
-        float velocityMagnitude = EnergyToVelocity(e.energy);
-        return new Vector3(velocityMagnitude * sintheta * Mathf.Cos(phi), velocityMagnitude * sintheta * Mathf.Sin(phi), velocityMagnitude * costheta); // set velocity vector
-    }
     Electron GenStartingElectron()
     {
         Electron e = new();
         float r = rng.RandomFloat() * diameter / 2; // random radius from center of simulation region
         float theta = rng.RandomFloat() * 2 * Mathf.PI; // random angle in xy-plane
-        e.position = new Vector3(r * Mathf.Cos(theta), r * Mathf.Sin(theta), 0); // set initial position at z=0
+        e.position = new Vector3(0, r * Mathf.Cos(theta), r * Mathf.Sin(theta)); // set initial position at x=0
         e.energy = rng.RandomFloat();
-        e.velocity = ScatterElectron(e);
-        if (e.velocity.z < 0)
+        float r1, r2, r3;
+        r1 = rng.RandomFloat();
+        r2 = rng.RandomFloat();
+        r3 = rng.RandomFloat();
+        float velocityMagnitude = EnergyToVelocity(e.energy);
+        float norm = Mathf.Sqrt(r1 * r1 + r2 * r2 + r3 * r3);
+        e.velocity = new Vector3(velocityMagnitude * r1 / norm, velocityMagnitude * r2 / norm, velocityMagnitude * r3 / norm);
+        if (e.velocity.x < 0)
         {
-            e.velocity.z *= -1; // ensure electron is moving in positive z-direction
+            e.velocity.x *= -1; // ensure electron is moving in positive x-direction
         }
         e.order = 0;
         e.time = 0;
         return e;
     }
 
-    public List<Tuple<Vector3, float, bool>> collisionPoints = new(); // list to store collision points for visualization
+    public List<Electron> collisionPoints = new(); // list to store collision points for visualization
     void SimulateElectron()
     {
         GetCollisionData();
@@ -240,10 +237,10 @@ public class MonteCarlo : MonoBehaviour
                 //move electron for time dt
                 currentElectron.position += currentElectron.velocity * dt;
                 float acceleration = electronCharge * efield / electronMass; // acceleration in m/s^2
-                currentElectron.position.z += 0.5f * acceleration * (dt * dt); // move in z-direction due to acceleration
-                currentElectron.velocity += new Vector3(0, 0, acceleration) * dt; // accelerate in z-direction
+                currentElectron.position.x += 0.5f * acceleration * (dt * dt); // move in x-direction due to acceleration
+                currentElectron.velocity += new Vector3(acceleration, 0, 0) * dt; // accelerate in z-direction
                 //check if electron has hit the plates
-                if (currentElectron.position.z < 0 || currentElectron.position.z > distance || currentElectron.position.x * currentElectron.position.x + currentElectron.position.y * currentElectron.position.y > (diameter * diameter) / 4)
+                if (currentElectron.position.x < 0 || currentElectron.position.x > distance) //note we do not check for collisions with the cylinder walls
                 {
                     //Debug.Log("Electron exited simulation region at position " + currentElectron.position.ToString("F6") + " after " + currentElectron.time + " seconds with energy " + currentElectron.energy.ToString("F4") + " eV and order " + currentElectron.order + " after " + collisionCount + " collisions.");
                     break; // electron has hit the plates or exited the cylinder
@@ -263,29 +260,44 @@ public class MonteCarlo : MonoBehaviour
                     if (collisionNumber < cumulativeProbability)
                     {
                         collisionCount++;
-                        collisionPoints.Add(new Tuple<Vector3, float, bool>(currentElectron.position, currentElectron.time, collisions[j].isIonization)); // store collision point for visualization
-                        //collision occurs, determine type of collision
-                        if (!collisions[j].isIonization)
+                        collisionPoints.Add(currentElectron); // store collision point for visualization
+                        //collision occurs
+                        currentElectron.energy -= collisions[j].energy; // subtract energy lost in collision
+                        if (collisions[j].isIonization)
                         {
-                            //subtract excitation energy from electron energy
-                            currentElectron.energy -= collisions[j].energy;
-                            currentElectron.velocity = ScatterElectron(currentElectron);
-                        } else
-                        {
-                            float energyToSplit = currentElectron.energy - collisions[j].energy;
-                            float r = rng.RandomFloat();
+                            float newElectronEnergy = currentElectron.energy * rng.RandomFloat(); // energy of secondary electron is random fraction of remaining energy
+                            float r1 = rng.RandomFloat();
+                            float r2 = rng.RandomFloat();
+                            float r3 = rng.RandomFloat();
+                            float secondaryVelocityMagnitude = EnergyToVelocity(newElectronEnergy);
+                            float norm = Mathf.Sqrt(r1 * r1 + r2 * r2 + r3 * r3);
                             Electron secondaryElectron = new()
                             {
                                 position = currentElectron.position,
-                                energy = energyToSplit * r,
+                                energy = newElectronEnergy,
+                                velocity = new Vector3(secondaryVelocityMagnitude * r1 / norm, secondaryVelocityMagnitude * r2 / norm, secondaryVelocityMagnitude * r3 / norm),
                                 order = currentElectron.order + 1,
                                 time = currentElectron.time
                             };
-                            currentElectron.energy = energyToSplit * (1 - r);
-                            currentElectron.velocity = ScatterElectron(currentElectron);
-                            secondaryElectron.velocity = ScatterElectron(secondaryElectron);
+                            currentElectron.energy -= newElectronEnergy;
                             electrons.Add(secondaryElectron);
                         }
+                        float velocityMagnitude = EnergyToVelocity(currentElectron.energy);
+                        //find theta and phi
+                        float cosPhi = currentElectron.velocity.z / currentElectron.velocity.magnitude;
+                        float sinPhi = Mathf.Sqrt(1 - cosPhi * cosPhi);
+                        float cosTheta = currentElectron.velocity.x / Mathf.Sqrt(currentElectron.velocity.x * currentElectron.velocity.x + currentElectron.velocity.y * currentElectron.velocity.y);
+                        float sinTheta = Mathf.Sqrt(1 - cosTheta * cosTheta);
+                        //generate scattering angles
+                        float cosChi = 1 - 2 * rng.RandomFloat();
+                        float sinChi = Mathf.Sqrt(1 - cosChi * cosChi);
+                        float nu = 2 * Mathf.PI * rng.RandomFloat();
+                        //update velocity vector using scattering angles
+                        currentElectron.velocity = new Vector3(
+                            velocityMagnitude * (cosTheta * cosChi - sinTheta * sinChi * Mathf.Cos(nu)),
+                            velocityMagnitude * (sinTheta * cosPhi * cosChi + cosTheta * cosPhi * sinChi * Mathf.Cos(nu) - sinPhi * sinChi * Mathf.Sin(nu)),
+                            velocityMagnitude * (sinTheta * sinPhi * cosChi + cosTheta * sinPhi * sinChi * Mathf.Cos(nu) + cosPhi * sinChi * Mathf.Sin(nu))
+                        );
                         break;
                     }
                 }

@@ -20,7 +20,6 @@ public class SimulationManager : MonoBehaviour
     public HeatMapType heatMapType = HeatMapType.Zone;
     [Space]
     public float timeInterval = 0.5f;
-    public float dataFrameInterval = 1e-8f;
     [Space]
     public Vector2Int textureSize = new Vector2Int(100, 100);
     public Vector2Int gridSize = new Vector2Int(10, 10);
@@ -35,9 +34,14 @@ public class SimulationManager : MonoBehaviour
     public Slider pressureSlider;
 
     private GameObject preview;
-    private List<List<Tuple<Vector3, float, bool>>> splitCollisionData;
+    
+    public int numFrames = 100;
+    float frameInterval = 0f;
+    public int currentFrame = 0;
+    float timeSinceLastFrame = 0f;
+    public int numSlices = 10;
+    private List<List<Electron>> splitCollisionData;
     private int currentFrameIndex = 0;
-    private float timeSinceLastFrame = 0f;
 
     private float initialDistance;
     private float initialDiameter;
@@ -55,8 +59,10 @@ public class SimulationManager : MonoBehaviour
         initialDistance = simulator.distance;
         initialDiameter = simulator.diameter;
 
-        splitCollisionData = SplitCollisionData(dataFrameInterval);
+        splitCollisionData = new List<List<Electron>>();
+        SplitCollisionData();
         currentFrameIndex = 0;
+        timeSinceLastFrame = 0f;
 
         if (splitCollisionData.Count > 0)
         {
@@ -76,31 +82,24 @@ public class SimulationManager : MonoBehaviour
 
         if (splitCollisionData != null && currentFrameIndex < splitCollisionData.Count && timeSinceLastFrame >= timeInterval)
         {
-            List<Tuple<Vector3, float, bool>> collisions = new List<Tuple<Vector3, float, bool>>();
-
-            for (int i=0; i<=currentFrameIndex; i++)
-            {
-                collisions.AddRange(splitCollisionData[i]);
-            }
-
-            ParticleMap map = CollisionsToMap(collisions);
-            RenderMap(map);
             currentFrameIndex++;
-            timeSinceLastFrame = 0f;
-
             if (currentFrameIndex >= splitCollisionData.Count)
             {
                 currentFrameIndex = 0;
                 timeSinceLastFrame = -1f;  // Pause 1 sec
             }
+
+            ParticleMap map = CollisionsToMap(splitCollisionData[currentFrameIndex]);
+            RenderMap(map);
+            timeSinceLastFrame = 0f;
         }
 
         if (Input.GetKeyDown(KeyCode.P))
         {
             for (int i=0; i<Mathf.Min(100, simulator.collisionPoints.Count); i++)
             {
-                var collision = simulator.collisionPoints[i];
-                Debug.Log($"Collision {i}: Position={collision.Item1}, Time={collision.Item2}, Ionization={collision.Item3}");
+                Electron collision = simulator.collisionPoints[i];
+                Debug.Log("Collision " + i + ": Position=" + collision.position.ToString("F6") + ", Time=" + collision.time + "s, Energy=" + collision.energy.ToString("F4") + "eV, Order=" + collision.order);
             }
         }
     }
@@ -127,7 +126,7 @@ public class SimulationManager : MonoBehaviour
         preview.transform.position = new Vector3(preview.transform.position.x, preview.transform.position.y, 10f);
     }
 
-    public ParticleMap CollisionsToMap(List<Tuple<Vector3, float, bool>> collisions)
+    public ParticleMap CollisionsToMap(List<Electron> collisions)
     {
         ParticleMap map = new ParticleMap();
         map.width = gridSize.x;
@@ -143,13 +142,12 @@ public class SimulationManager : MonoBehaviour
 
         foreach (var collision in collisions)
         {
-            Vector2 pos = CollisionDataToPosition(collision);
-            pos = new Vector2(
-                pos.x / initialDistance * gridSize.x,
-                pos.y / initialDiameter * gridSize.y
-            );
+            Vector2 pos = new Vector2(collision.position.x, collision.position.z);
+            //convert to between 0 and 1
+            pos.x = (pos.x + simulator.diameter / 2f) / simulator.diameter * textureSize.x;
+            pos.y = pos.y / simulator.distance * gridSize.y * textureSize.y;
 
-            int type = collision.Item3 ? 1 : 0;
+            int type = 1;//TODO: collision.Item3 ? 1 : 0;
             map.particles.Add(type);
             map.particlePositions.Add(pos);
         }
@@ -157,36 +155,31 @@ public class SimulationManager : MonoBehaviour
         return map;
     }
 
-    public List<List<Tuple<Vector3, float, bool>>> SplitCollisionData(float frameInterval)
+    public void SplitCollisionData()
     {
-        List<List<Tuple<Vector3, float, bool>>> splitData = new List<List<Tuple<Vector3, float, bool>>>();
-        List<Tuple<Vector3, float, bool>> currentFrame = new List<Tuple<Vector3, float, bool>>();
-        float maxTimeStamp = frameInterval;
-        float frameMaxTime = frameInterval;
-        foreach (var collision in simulator.collisionPoints)
+        float maxTime = 0f;
+        foreach (Electron electron in simulator.collisionPoints)
         {
-            if (collision.Item2 > frameMaxTime)
+            if (electron.time > maxTime)
             {
-                splitData.Add(currentFrame);
-                currentFrame = new List<Tuple<Vector3, float, bool>>();
-                frameMaxTime += frameInterval;
+                maxTime = electron.time;
             }
-            currentFrame.Add(collision);
         }
-        if (currentFrame.Count > 0)
+        frameInterval = maxTime / numFrames;
+        for (int i=0; i<numFrames; i++)
         {
-            splitData.Add(currentFrame);
+            float frameStart = i * frameInterval;
+            float frameEnd = (i + 1) * frameInterval;
+            List<Electron> frameCollisions = new List<Electron>();
+            foreach (Electron electron in simulator.collisionPoints)
+            {
+                if (electron.time >= frameStart && electron.time < frameEnd)
+                {
+                    frameCollisions.Add(electron);
+                }
+            }
+            splitCollisionData.Add(frameCollisions);
         }
-
-        Debug.Log($"{splitData.Count} frames from {simulator.collisionPoints.Count} collisions with frame interval {frameInterval}s");
-
-        return splitData;
-    }
-
-    public Vector2 CollisionDataToPosition(Tuple<Vector3, float, bool> collision)
-    {
-        Vector3 pos = collision.Item1;
-        return new Vector2(pos.z, pos.x);
     }
 
     public void GraphCollisionsAndDistance()
@@ -201,20 +194,96 @@ public class SimulationManager : MonoBehaviour
         List<float> dataX = new List<float>();
         List<float> dataY = new List<float>();
 
-        List<Tuple<Vector3, float, bool>> dataSample;
-        dataSample = new();
-        int sampleSize = Mathf.Min(1000, totalCollisions);
-        for (int i = 0; i < sampleSize; i++)
+        for (int i = 0; i < numSlices; i++)
         {
-            int index = (int)(i * (float)totalCollisions / sampleSize);
-            dataX.Add(simulator.collisionPoints[index].Item1.z * 1000f); // convert to mm
-            dataY.Add(UnityEngine.Random.Range(0f, 1f)); // each sample point represents one collision
+            float sliceStart = i * simulator.distance / numSlices;
+            float sliceEnd = (i + 1) * simulator.distance / numSlices;
+
+            dataX.Add((sliceStart + sliceEnd) / 2f * 1000f); // convert to mm
+            int collisionsInSlice = 0;
+            foreach (Electron collision in simulator.collisionPoints)
+            {
+                float z = collision.position.z;
+                if (z >= sliceStart && z < sliceEnd)
+                {
+                    collisionsInSlice++;
+                }
+            }
+            dataY.Add(collisionsInSlice);
+        }
+
+        data.dataX = dataX;
+        data.dataY = dataY;
+
+        List<float> lnNumCollisions = new List<float>();
+        foreach (float collisions in dataY)
+        {
+            lnNumCollisions.Add(collisions > 0 ? Mathf.Log(collisions) : 0f);
+        }
+
+        Tuple<float, float, float> fit = LinearRegression(dataX, lnNumCollisions);
+        Debug.Log("Linear fit: ln(Collisions) = " + fit.Item1.ToString("F4") + " * Distance + " + fit.Item2.ToString("F4") + " with R^2 = " + fit.Item3.ToString("F4"));
+
+        GameObject graph = graphGenerator.GenerateGraph(data, graphParent.transform);
+    }
+
+    public Tuple<float, float, float> LinearRegression(List<float> x, List<float> y)
+    {
+        int n = x.Count;
+        float sumX = 0f, sumY = 0f, sumXY = 0f, sumX2 = 0f;
+
+        for (int i = 0; i < n; i++)
+        {
+            sumX += x[i];
+            sumY += y[i];
+            sumXY += x[i] * y[i];
+            sumX2 += x[i] * x[i];
+        }
+
+        float slope = (n * sumXY - sumX * sumY) / (n * sumX2 - sumX * sumX);
+        float intercept = (sumY - slope * sumX) / n;
+
+        // Calculate R-squared
+        float ssTot = 0f, ssRes = 0f;
+        for (int i = 0; i < n; i++)
+        {
+            float predictedY = slope * x[i] + intercept;
+            ssTot += (y[i] - sumY / n) * (y[i] - sumY / n);
+            ssRes += (y[i] - predictedY) * (y[i] - predictedY);
+        }
+        float rSquared = 1f - ssRes / ssTot;
+
+        return new Tuple<float, float, float>(slope, intercept, rSquared);
+    }
+
+    public float GraphEnergyAndTime()
+    {
+        GraphData data = new GraphData();
+        data.title = "Energy vs Time";
+        data.labelX = "Time (s)";
+        data.labelY = "Energy (eV)";
+
+        List<float> dataX = new List<float>();
+        List<float> dataY = new List<float>();
+
+        for (int i = 0; i < numFrames; i++)
+        {
+            dataX.Add(i * frameInterval);
+            float averageEnergy = 0f;
+            for (int j = 0; j < splitCollisionData[i].Count; j++)
+            {
+                averageEnergy += splitCollisionData[i][j].energy;
+            }
+            averageEnergy /= splitCollisionData[i].Count;
+            dataY.Add(averageEnergy);
         }
 
         data.dataX = dataX;
         data.dataY = dataY;
 
         GameObject graph = graphGenerator.GenerateGraph(data, graphParent.transform);
+
+        return 0f;
     }
 
     public void ReducedElectrificationChanged() { simulator.reducedEfield = reducedElectrificationSlider.value; }
