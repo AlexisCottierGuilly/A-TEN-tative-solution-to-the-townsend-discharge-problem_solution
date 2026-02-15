@@ -231,7 +231,7 @@ public class MonteCarlo : MonoBehaviour
             electrons.RemoveAt(0);
             while (collisionCount < maxCollisions)
             {
-                collisionCount++;
+                //collisionCount++;
                 //find time of collision
                 float dt = -1/maxFrequency * Mathf.Log(1 - rng.RandomFloat());
                 //move electron for time dt
@@ -242,7 +242,7 @@ public class MonteCarlo : MonoBehaviour
                 //check if electron has hit the plates
                 if (currentElectron.position.z < 0 || currentElectron.position.z > distance || currentElectron.position.x * currentElectron.position.x + currentElectron.position.y * currentElectron.position.y > (diameter * diameter) / 4)
                 {
-                    Debug.Log("Electron exited simulation region at position " + currentElectron.position.ToString("F6") + " after " + currentElectron.time.ToString("F4") + " seconds with energy " + currentElectron.energy.ToString("F4") + " eV and order " + currentElectron.order);
+                    Debug.Log("Electron exited simulation region at position " + currentElectron.position.ToString("F6") + " after " + currentElectron.time.ToString("F4") + " seconds with energy " + currentElectron.energy.ToString("F4") + " eV and order " + currentElectron.order + " after " + collisionCount + " collisions.");
                     break; // electron has hit the plates or exited the cylinder
                 }
                 currentElectron.energy = 0.5f * electronMass * currentElectron.velocity.sqrMagnitude / eVtoJ; // update energy in eV
@@ -259,6 +259,7 @@ public class MonteCarlo : MonoBehaviour
                     cumulativeProbability += density * collisions[j].GetCrossSection(currentElectron.energy) * EnergyToVelocity(currentElectron.energy) / maxFrequency; // calculate cumulative probability of collision
                     if (collisionNumber < cumulativeProbability)
                     {
+                        collisionCount++;
                         collisionPoints.Add(new Tuple<Vector3, float, bool>(currentElectron.position, currentElectron.time, collisions[j].isIonization)); // store collision point for visualization
                         //collision occurs, determine type of collision
                         if (!collisions[j].isIonization)
