@@ -129,17 +129,22 @@ public class SimulationUIManager : MonoBehaviour
         float elapsedTime = 0f;
         while (elapsedTime < time)
         {
+            float usedDeltaTime = Time.deltaTime;
+            if (elapsedTime + usedDeltaTime > time)
+            {
+                usedDeltaTime = time - elapsedTime;
+            }
+
             foreach (GameObject element in elements)
             {
                 if (IsGraphElement(element))
                 {
-                    element.GetComponent<Transform>().position += new Vector3(0, WorldToUIScale(distance * Time.deltaTime / time), 0);
+                    element.GetComponent<Transform>().position += new Vector3(0, WorldToUIScale(distance * usedDeltaTime / time), 0);
                 }
                 else if (IsWorldElement(element))
                 {
-                    element.GetComponent<Transform>().position += new Vector3(0, distance * Time.deltaTime / time, 0);
+                    element.GetComponent<Transform>().position += new Vector3(0, distance * usedDeltaTime / time, 0);
                 }
-                
             }
 
             elapsedTime += Time.deltaTime;
