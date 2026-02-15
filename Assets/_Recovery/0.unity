@@ -330,12 +330,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1d90b669628e4dc498a751220411babf, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MonteCarlo
-  maxCollisions: 10000
-  numElectrons: 2
+  maxCollisions: 10000000
+  numElectrons: 1000
   reducedEfield: 100
   distance: 0.01
   pressure: 10
   diameter: 0.05
+  collisionPoints: []
 --- !u!4 &239523295
 Transform:
   m_ObjectHideFlags: 0
