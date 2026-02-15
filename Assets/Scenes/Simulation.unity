@@ -3941,8 +3941,9 @@ MonoBehaviour:
   uiManager: {fileID: 1451318876}
   graphParent: {fileID: 229876390}
   heatMapType: 0
-  timeInterval: 0.01
-  timeFrameInterval: 0.00000002
+  cumulative: 1
+  timeInterval: 0.02
+  timeFrameInterval: 0.00000004
   textureSize: {x: 555, y: 300}
   gridSize: {x: 111, y: 60}
   previewOffset: {x: 0.04, y: 0}
@@ -4791,6 +4792,7 @@ MonoBehaviour:
   elements:
   - {fileID: 1809678121}
   spacing: 3.5
+  elementHeight: 5.5
   scaleFactor: 40
   center: {x: 2.95, y: 0}
 --- !u!4 &1451318877

@@ -19,6 +19,7 @@ public class SimulationManager : MonoBehaviour
 
     [Header("Simulation Render")]
     public HeatMapType heatMapType = HeatMapType.Zone;
+    public bool cumulative = false;
     [Space]
     public float timeInterval = 0.01f;
     public float timeFrameInterval = 2e-8f;
@@ -36,7 +37,8 @@ public class SimulationManager : MonoBehaviour
     public Slider pressureSlider;
 
     private GameObject preview;
-    private GameObject graph;
+    private GameObject graph1;
+    private GameObject graph2;
     
     public int numFrames = 100;
     float frameInterval = 0f;
@@ -74,14 +76,25 @@ public class SimulationManager : MonoBehaviour
             RenderMap(map);
         }
 
-        if (graph != null)
+        if (graph1 != null)
         {
-            uiManager.removeFromElements(graph);
-            Destroy(graph);
+            uiManager.RemoveFromElements(graph1);
+            Destroy(graph1);
         }
 
-        graph = GraphCollisionsAndDistance();
-        uiManager.AddToElements(graph);
+        if (graph2 != null)
+        {
+            uiManager.RemoveFromElements(graph2);
+            Destroy(graph2);
+        }
+
+        GraphData data1 = GetCollisionAndDistanceData();
+        graph1 = GraphCollisionsAndDistance(data1);
+        uiManager.AddToElements(graph1);
+
+        GraphData linearizedData = GetLinearizedCollisionData(data1);
+        graph2 = graphGenerator.GenerateGraph(linearizedData, graphParent.transform);
+        uiManager.AddToElements(graph2);
     }
 
     public void SimulationDidStart()
@@ -106,7 +119,16 @@ public class SimulationManager : MonoBehaviour
                 timeSinceLastFrame = -1f;  // Pause 1 sec
             }
 
-            ParticleMap map = CollisionsToMap(splitCollisionData[currentFrameIndex]);
+            List<Electron> collisionsToRender = cumulative ? new List<Electron>() : splitCollisionData[currentFrameIndex];
+            if (cumulative)
+            {
+                for (int i=0; i<=currentFrameIndex; i++)
+                {
+                    collisionsToRender.AddRange(splitCollisionData[i]);
+                }
+            }
+
+            ParticleMap map = CollisionsToMap(collisionsToRender);
             RenderMap(map);
             timeSinceLastFrame = 0f;
         }
@@ -201,10 +223,30 @@ public class SimulationManager : MonoBehaviour
         }
     }
 
-    public GameObject GraphCollisionsAndDistance()
+    public GraphData GetLinearizedCollisionData(GraphData originalData)
     {
-        int totalCollisions = simulator.collisionPoints.Count;
+        GraphData data = new GraphData();
+        data.title = "Log of Collisions Per Distance";
+        data.labelX = originalData.labelX;
+        data.labelY = "ln(" + originalData.labelY + ")";
 
+        List<float> dataX = new List<float>();
+        List<float> dataY = new List<float>();
+
+        for (int i = 0; i < originalData.dataX.Count; i++)
+        {
+            dataX.Add(originalData.dataX[i]);
+            dataY.Add(originalData.dataY[i] > 0 ? Mathf.Log(originalData.dataY[i]) : 0f);
+        }
+
+        data.dataX = dataX;
+        data.dataY = dataY;
+
+        return data;
+    }
+
+    public GraphData GetCollisionAndDistanceData()
+    {
         GraphData data = new GraphData();
         data.title = "Collision Per Distance";
         data.labelX = "Distance (mm)";
@@ -237,13 +279,20 @@ public class SimulationManager : MonoBehaviour
         data.dataX = dataX;
         data.dataY = dataY;
 
+        return data;
+    }
+
+    public GameObject GraphCollisionsAndDistance(GraphData data)
+    {
+        int totalCollisions = simulator.collisionPoints.Count;
+
         List<float> lnNumCollisions = new List<float>();
-        foreach (float collisions in dataY)
+        foreach (float collisions in data.dataY)
         {
             lnNumCollisions.Add(collisions > 0 ? Mathf.Log(collisions) : 0f);
         }
 
-        Tuple<float, float, float> fit = LinearRegression(dataX, lnNumCollisions);
+        Tuple<float, float, float> fit = LinearRegression(data.dataX, lnNumCollisions);
         Debug.Log("Linear fit: ln(Collisions) = " + fit.Item1.ToString("F4") + " * Distance + " + fit.Item2.ToString("F4") + " with R^2 = " + fit.Item3.ToString("F4"));
 
         GameObject graph = graphGenerator.GenerateGraph(data, graphParent.transform);

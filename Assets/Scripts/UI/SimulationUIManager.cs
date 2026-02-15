@@ -9,6 +9,7 @@ public class SimulationUIManager : MonoBehaviour
     [Space]
     public List<GameObject> elements = new List<GameObject>();
     public float spacing = 2.5f;
+    public float elementHeight = 5f;
     public float scaleFactor = 1f;
 
     public Vector2 center = new Vector2(0f, 0f);
@@ -29,26 +30,13 @@ public class SimulationUIManager : MonoBehaviour
 
     public void AddToElements(GameObject element)
     {
-        float lastY = 0f;
-        if (elements.Count > 0)
-        {
-            GameObject lastElement = elements[elements.Count - 1];
-            if (IsGraphElement(lastElement))
-            {
-                lastY = GetUIElementBottomY(lastElement.GetComponent<GraphManager>().axes.gameObject) + WorldToUIScale(spacing);
-            }
-            else if (IsWorldElement(lastElement))
-            {
-                lastY = GetWorldElementBottomY(lastElement) + spacing;
-            }
-        }
+        float lastY = center.y - ((elements.Count - 0.5f) * elementHeight + (elements.Count - 0.5f) * spacing);
 
         elements.Add(element);
 
         if (IsGraphElement(element))
         {
             Transform transform = element.GetComponent<Transform>();
-            lastY -= UIToWorldScale(element.GetComponent<GraphManager>().axes.rect.height) * 2.75f;
             transform.position = new Vector3(WorldToUIScale(center.x) * 4.5f, WorldToUIScale(lastY), transform.position.z);
         }
         else if (IsWorldElement(element))
@@ -59,11 +47,12 @@ public class SimulationUIManager : MonoBehaviour
         }
     }
 
-    public void removeFromElements(GameObject element)
+    public void RemoveFromElements(GameObject element)
     {
-        if (GetVisibleElement() == element)
+        float scrollTime = scrollState * 0.25f;
+        for (int i=0; i < scrollState; i++)
         {
-            ScrollDown();
+            ScrollDown(scrollTime);
         }
 
         if (elements.Contains(element))
@@ -80,7 +69,7 @@ public class SimulationUIManager : MonoBehaviour
         return elements[scrollState];
     }
 
-    void ScrollUp()
+    void ScrollUp(float time = 0.25f)
     {
         if (scrollState >= elements.Count - 1)
             return;
@@ -91,12 +80,12 @@ public class SimulationUIManager : MonoBehaviour
 
         if (visibleElement != null)
         {
-            float scrollDistance = GetScrollDistance(visibleElement) + spacing;
-            StartCoroutine(MoveAllElements(scrollDistance));
+            float scrollDistance = elementHeight + spacing;
+            StartCoroutine(MoveAllElements(scrollDistance, time));
         }
     }
 
-    void ScrollDown()
+    void ScrollDown(float time = 0.25f)
     {
         if (scrollState <= 0)
             return;
@@ -106,8 +95,8 @@ public class SimulationUIManager : MonoBehaviour
         GameObject visibleElement = GetVisibleElement();
         if (visibleElement != null)
         {
-            float scrollDistance = GetScrollDistance(visibleElement) + spacing;
-            StartCoroutine(MoveAllElements(-scrollDistance));
+            float scrollDistance = elementHeight + spacing;
+            StartCoroutine(MoveAllElements(-scrollDistance, time));
         }
     }
 
@@ -172,7 +161,7 @@ public class SimulationUIManager : MonoBehaviour
     float GetUIElementBottomY(GameObject element)
     {
         RectTransform rectTransform = element.GetComponent<RectTransform>();
-        return rectTransform.position.y - UIToWorldScale(rectTransform.rect.height) / 2f;
+        return rectTransform.position.y - UIToWorldScale(rectTransform.rect.height) / 8f;
     }
 
     float GetScrollDistance(GameObject element)
