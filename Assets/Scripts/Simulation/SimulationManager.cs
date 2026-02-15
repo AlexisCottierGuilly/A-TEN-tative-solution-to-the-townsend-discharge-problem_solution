@@ -14,6 +14,7 @@ public class SimulationManager : MonoBehaviour
     public MonteCarlo simulator;
     public TextureRenderer textureRenderer;
     public GraphGenerator graphGenerator;
+    public SimulationUIManager uiManager;
     public GameObject graphParent;
 
     [Header("Simulation Render")]
@@ -35,6 +36,7 @@ public class SimulationManager : MonoBehaviour
     public Slider pressureSlider;
 
     private GameObject preview;
+    private GameObject graph;
     private List<List<Tuple<Vector3, float, bool>>> splitCollisionData;
     private int currentFrameIndex = 0;
     private float timeSinceLastFrame = 0f;
@@ -63,15 +65,28 @@ public class SimulationManager : MonoBehaviour
             ParticleMap map = CollisionsToMap(splitCollisionData[0]);
             RenderMap(map);
         }
+
+        if (graph != null)
+        {
+            uiManager.removeFromElements(graph);
+            Destroy(graph);
+        }
+
+        graph = GraphCollisionsAndDistance();
+        uiManager.AddToElements(graph);
+    }
+
+    public void SimulationDidStart()
+    {
+        Debug.Log("SIMULATION STARTED");
+        if (preview != null)
+        {
+            Destroy(preview);
+        }
     }
 
     void Update()
     {
-        if (Input.GetKeyUp(KeyCode.G))
-        {
-            GraphCollisionsAndDistance();
-        }
-
         timeSinceLastFrame += Time.deltaTime;
 
         if (splitCollisionData != null && currentFrameIndex < splitCollisionData.Count && timeSinceLastFrame >= timeInterval)
@@ -92,15 +107,6 @@ public class SimulationManager : MonoBehaviour
             {
                 currentFrameIndex = 0;
                 timeSinceLastFrame = -1f;  // Pause 1 sec
-            }
-        }
-
-        if (Input.GetKeyDown(KeyCode.P))
-        {
-            for (int i=0; i<Mathf.Min(100, simulator.collisionPoints.Count); i++)
-            {
-                var collision = simulator.collisionPoints[i];
-                Debug.Log($"Collision {i}: Position={collision.Item1}, Time={collision.Item2}, Ionization={collision.Item3}");
             }
         }
     }
@@ -189,7 +195,7 @@ public class SimulationManager : MonoBehaviour
         return new Vector2(pos.z, pos.x);
     }
 
-    public void GraphCollisionsAndDistance()
+    public GameObject GraphCollisionsAndDistance()
     {
         int totalCollisions = simulator.collisionPoints.Count;
 
@@ -215,6 +221,7 @@ public class SimulationManager : MonoBehaviour
         data.dataY = dataY;
 
         GameObject graph = graphGenerator.GenerateGraph(data, graphParent.transform);
+        return graph;
     }
 
     public void ReducedElectrificationChanged() { simulator.reducedEfield = reducedElectrificationSlider.value; }
