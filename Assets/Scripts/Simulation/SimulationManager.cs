@@ -42,7 +42,6 @@ public class SimulationManager : MonoBehaviour
     public int currentFrame = 0;
     float timeSinceLastFrame = 0f;
     public int numSlices = 10;
-    private GameObject graph;
     private List<List<Electron>> splitCollisionData;
     private int currentFrameIndex = 0;
 
@@ -274,7 +273,7 @@ public class SimulationManager : MonoBehaviour
         return new Tuple<float, float, float>(slope, intercept, rSquared);
     }
 
-    public float GraphEnergyAndTime()
+    public GameObject GraphEnergyAndTime()
     {
         GraphData data = new GraphData();
         data.title = "Energy vs Time";
