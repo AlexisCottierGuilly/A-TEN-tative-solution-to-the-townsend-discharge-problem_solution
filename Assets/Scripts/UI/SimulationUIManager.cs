@@ -30,7 +30,7 @@ public class SimulationUIManager : MonoBehaviour
 
     public void AddToElements(GameObject element)
     {
-        float lastY = center.y - ((elements.Count - 0.5f) * elementHeight + (elements.Count - 0.5f) * spacing);
+        float lastY = center.y - ((elements.Count - 0.25f) * elementHeight + (elements.Count - 0.5f) * spacing);
 
         Debug.Log($"Elements: {elements.Count}, LastY: {lastY}");
 

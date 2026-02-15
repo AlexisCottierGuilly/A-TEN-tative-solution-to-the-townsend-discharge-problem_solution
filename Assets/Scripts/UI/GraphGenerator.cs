@@ -35,6 +35,9 @@ public class GraphGenerator : MonoBehaviour
         manager.SetLabelX(data.labelX);
         manager.SetLabelY(data.labelY);
 
+        if (data.visibleSlope)
+            manager.SetSlopeAndR2(data.slope, data.r2);
+
         Vector2 limitsX = GetSmartLimits(data.dataX, 13, true);
         Vector2 limitsY = GetSmartLimits(data.dataY, 5, true);
         manager.SetGraduationsX(GetGraduationsFromData(data.dataX, 13, limitsX), format: "F1");
@@ -156,6 +159,11 @@ public class GraphData
     public string title;
     public string labelX;
     public string labelY;
+
+    [Space]
+    public bool visibleSlope = false;
+    public float slope;
+    public float r2;
 
     [Space]
     public List<float> dataX;

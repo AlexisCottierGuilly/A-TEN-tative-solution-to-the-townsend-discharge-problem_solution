@@ -240,6 +240,10 @@ public class SimulationManager : MonoBehaviour
         data.labelX = originalData.labelX;
         data.labelY = "ln(" + originalData.labelY + ")";
 
+        data.visibleSlope = true;
+        data.slope = originalData.slope;
+        data.r2 = originalData.r2;
+
         List<float> dataX = new List<float>();
         List<float> dataY = new List<float>();
 
@@ -304,6 +308,9 @@ public class SimulationManager : MonoBehaviour
 
         Tuple<float, float, float> fit = LinearRegression(data.dataX, lnNumCollisions);
         Debug.Log("Linear fit: ln(Collisions) = " + fit.Item1.ToString("F4") + " * Distance + " + fit.Item2.ToString("F4") + " with R^2 = " + fit.Item3.ToString("F4"));
+
+        data.slope = fit.Item1;
+        data.r2 = fit.Item3;
 
         GameObject graph = graphGenerator.GenerateGraph(data, graphParent.transform);
 

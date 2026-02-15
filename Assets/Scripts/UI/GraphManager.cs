@@ -8,6 +8,7 @@ public class GraphManager : MonoBehaviour
     public TextMeshProUGUI graphTitle;
     public TextMeshProUGUI labelX;
     public TextMeshProUGUI labelY;
+    public TextMeshProUGUI slopeText;
 
     [Space]
     public List<TextMeshProUGUI> graduationsX;
@@ -21,7 +22,7 @@ public class GraphManager : MonoBehaviour
     public void SetTitle(string title) { graphTitle.text = title; }
     public void SetLabelX(string label) { labelX.text = label; }
     public void SetLabelY(string label) { labelY.text = label; }
-
+    public void SetSlopeAndR2(float slope, float r2) { slopeText.text = $"α = {slope:F4}\nR² = {r2:F2}"; }
     public void SetGraduationsX(List<float> graduations, string format = "F2")
     {
         for (int i = 0; i < graduationsX.Count; i++)
