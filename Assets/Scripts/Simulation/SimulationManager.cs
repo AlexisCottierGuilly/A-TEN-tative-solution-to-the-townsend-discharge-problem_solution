@@ -6,8 +6,18 @@ using System;
 public class SimulationManager : MonoBehaviour
 {
     public MonteCarlo simulator;
+    public TextureRenderer textureRenderer;
     public GraphGenerator graphGenerator;
     public GameObject graphParent;
+
+    [Header("Simulation Render")]
+    public float timeInterval = 0.5f;
+    public float dataFrameInterval = 0.1f;
+    [Space]
+    public Vector2Int textureSize = new Vector2Int(100, 100);
+    public Vector2Int gridSize = new Vector2Int(10, 10);
+    public Vector2 previewOffset = new Vector2(0f, 0f);
+    public Vector2 previewSize = new Vector2(10f, 10f);
 
     [Space]
     public Slider reducedElectrificationSlider;
@@ -21,12 +31,44 @@ public class SimulationManager : MonoBehaviour
         PressureChanged();
     }
 
+    public void SimulationDidFinish()
+    {
+        Debug.Log("SIMULATION FINISHED");
+    }
+
     void Update()
     {
         if (Input.GetKeyUp(KeyCode.G))
         {
             GraphCollisionsAndDistance();
         }
+
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            
+        }
+    }
+
+    public List<List<Tuple<Vector3, float, bool>>> SplitCollisionData(float frameInterval)
+    {
+        List<List<Tuple<Vector3, float, bool>>> splitData = new List<List<Tuple<Vector3, float, bool>>>();
+        List<Tuple<Vector3, float, bool>> currentFrame = new List<Tuple<Vector3, float, bool>>();
+        float lastTimestamp = 0f;
+        foreach (var collision in simulator.collisionPoints)
+        {
+            if (collision.Item2 - lastTimestamp > frameInterval)
+            {
+                splitData.Add(currentFrame);
+                currentFrame = new List<Tuple<Vector3, float, bool>>();
+                lastTimestamp = collision.Item2;
+            }
+            currentFrame.Add(collision);
+        }
+        if (currentFrame.Count > 0)
+        {
+            splitData.Add(currentFrame);
+        }
+        return splitData;
     }
 
     public void GraphCollisionsAndDistance()

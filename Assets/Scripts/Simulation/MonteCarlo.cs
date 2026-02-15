@@ -86,6 +86,9 @@ class PCG
 
 public class MonteCarlo : MonoBehaviour
 {
+    // SECTION: Script dependancies
+    public SimulationManager simulationManager;
+    
     // SECTION: Simulation parameters
     public uint    maxCollisions = (uint)10e6; // number of collisions to simulate for each electron
     public int    numElectrons = 1000; // number of electrons to simulate
@@ -299,5 +302,7 @@ public class MonteCarlo : MonoBehaviour
         {
             SimulateElectron();
         }
+
+        simulationManager.SimulationDidFinish();
     }
 }
