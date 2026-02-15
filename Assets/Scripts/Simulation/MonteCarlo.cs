@@ -3,6 +3,7 @@ using UnityEngine;
 using System.Collections.Generic;
 using System.IO;
 using System;
+using System.Diagnostics;
 struct CrossSectionMap // tuple for mapping energy (eV) to cross section (m^2)
 {
     public float Energy;
@@ -179,7 +180,6 @@ public class MonteCarlo : MonoBehaviour
                     collision.crossSections.Add(new CrossSectionMap(energy, crossSection));
                 }
                 collision.energy = collision.crossSections[0].Energy; // set energy to first energy value in cross section data
-                Debug.Log("Read collision with energy " + collision.energy + " eV and " + collision.crossSections.Count + " cross section points");
                 collisions.Add(collision);
             }
         }
@@ -195,7 +195,7 @@ public class MonteCarlo : MonoBehaviour
         float sintheta = Mathf.Sqrt(1 - costheta * costheta);
         float phi = rng.RandomFloat() * 2 * Mathf.PI; // random xy angle
         float velocityMagnitude = EnergyToVelocity(e.energy);
-                return new Vector3(velocityMagnitude * sintheta * Mathf.Cos(phi), velocityMagnitude * sintheta * Mathf.Sin(phi), velocityMagnitude * costheta); // set velocity vector
+        return new Vector3(velocityMagnitude * sintheta * Mathf.Cos(phi), velocityMagnitude * sintheta * Mathf.Sin(phi), velocityMagnitude * costheta); // set velocity vector
     }
     Electron GenStartingElectron()
     {
@@ -204,7 +204,7 @@ public class MonteCarlo : MonoBehaviour
         float theta = rng.RandomFloat() * 2 * Mathf.PI; // random angle in xy-plane
         e.position = new Vector3(r * Mathf.Cos(theta), r * Mathf.Sin(theta), 0); // set initial position at z=0
         e.energy = rng.RandomFloat();
-        e.velocity = new Vector3(0f, 0f, 0f);//ScatterElectron(e);
+        e.velocity = ScatterElectron(e);
         if (e.velocity.z < 0)
         {
             e.velocity.z *= -1; // ensure electron is moving in positive z-direction
@@ -221,7 +221,6 @@ public class MonteCarlo : MonoBehaviour
         float maxFrequency = GetMaxFrequency();
         float density = GetDensity(pressure);
         float efield = GetEfield(reducedEfield, density);
-        rng = new PCG(10); // theme!!!!
         List<Electron> electrons = new();
         //initialize first electron at z=0, with random x,y position and maxwellian velocity distribution
         Electron e = GenStartingElectron();
@@ -230,7 +229,6 @@ public class MonteCarlo : MonoBehaviour
         while (electrons.Count > 0 && collisionCount < maxCollisions)
         {
             Electron currentElectron = electrons[0];
-            Debug.Log("Simulating of order " + currentElectron.order);
             electrons.RemoveAt(0);
             while (collisionCount < maxCollisions)
             {
@@ -245,6 +243,7 @@ public class MonteCarlo : MonoBehaviour
                 //check if electron has hit the plates
                 if (currentElectron.position.z < 0 || currentElectron.position.z > distance || currentElectron.position.x * currentElectron.position.x + currentElectron.position.y * currentElectron.position.y > (diameter * diameter) / 4)
                 {
+                    //increase precision of printed position
                     break; // electron has hit the plates or exited the cylinder
                 }
                 currentElectron.energy = 0.5f * electronMass * currentElectron.velocity.sqrMagnitude / eVtoJ; // update energy in eV
@@ -293,6 +292,8 @@ public class MonteCarlo : MonoBehaviour
 
     public void RunSimulation()
     {
+        Debug.Log("Running simulation");
+        rng = new PCG(10); // theme!!!!
         collisionPoints.Clear();
         for (int i = 0; i < numElectrons; i++)
         {
