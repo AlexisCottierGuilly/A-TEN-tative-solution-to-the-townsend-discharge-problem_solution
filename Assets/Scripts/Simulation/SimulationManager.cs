@@ -59,6 +59,14 @@ public class SimulationManager : MonoBehaviour
         PressureChanged();
     }
 
+    public void HeatMapTypeToggled()
+    {
+        if (heatMapType == HeatMapType.Zone)
+            heatMapType = HeatMapType.Point;
+        else
+            heatMapType = HeatMapType.Zone;
+    }
+
     public void SimulationDidFinish()
     {
         Debug.Log("SIMULATION FINISHED");
