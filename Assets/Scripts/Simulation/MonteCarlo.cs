@@ -245,7 +245,7 @@ public class MonteCarlo : MonoBehaviour
                 //check if electron has hit the plates
                 if (currentElectron.position.z < 0 || currentElectron.position.z > distance || currentElectron.position.x * currentElectron.position.x + currentElectron.position.y * currentElectron.position.y > (diameter * diameter) / 4)
                 {
-                    Debug.Log("Electron exited simulation region at position " + currentElectron.position.ToString("F6") + " after " + currentElectron.time.ToString("F4") + " seconds with energy " + currentElectron.energy.ToString("F4") + " eV and order " + currentElectron.order + " after " + collisionCount + " collisions.");
+                    //Debug.Log("Electron exited simulation region at position " + currentElectron.position.ToString("F6") + " after " + currentElectron.time + " seconds with energy " + currentElectron.energy.ToString("F4") + " eV and order " + currentElectron.order + " after " + collisionCount + " collisions.");
                     break; // electron has hit the plates or exited the cylinder
                 }
                 currentElectron.energy = 0.5f * electronMass * currentElectron.velocity.sqrMagnitude / eVtoJ; // update energy in eV
