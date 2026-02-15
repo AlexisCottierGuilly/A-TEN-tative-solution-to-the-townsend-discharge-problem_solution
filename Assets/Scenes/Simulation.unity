@@ -3924,15 +3924,17 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: '::'
   simulator: {fileID: 239523294}
-  textureRenderer: {fileID: 0}
+  textureRenderer: {fileID: 522649958}
   graphGenerator: {fileID: 1785756752}
   graphParent: {fileID: 229876390}
-  timeInterval: 0.5
-  dataFrameInterval: 0.1
-  textureSize: {x: 100, y: 100}
-  gridSize: {x: 10, y: 10}
-  previewOffset: {x: 0, y: 0}
-  previewSize: {x: 10, y: 10}
+  heatMapType: 1
+  timeInterval: 0.02
+  dataFrameInterval: 0.000000001
+  textureSize: {x: 555, y: 300}
+  gridSize: {x: 111, y: 60}
+  previewOffset: {x: 0.04, y: 0}
+  previewSize: {x: 233.1, y: 126}
+  previewParent: {fileID: 1809678123}
   reducedElectrificationSlider: {fileID: 1809600055}
   electrodeDistanceSlider: {fileID: 1826686096}
   pressureSlider: {fileID: 1010157310}

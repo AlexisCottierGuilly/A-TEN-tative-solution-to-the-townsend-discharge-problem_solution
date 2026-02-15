@@ -3,6 +3,12 @@ using UnityEngine.UI;
 using System.Collections.Generic;
 using System;
 
+public enum HeatMapType
+{
+    Zone,
+    Point
+}
+
 public class SimulationManager : MonoBehaviour
 {
     public MonteCarlo simulator;
@@ -11,18 +17,27 @@ public class SimulationManager : MonoBehaviour
     public GameObject graphParent;
 
     [Header("Simulation Render")]
+    public HeatMapType heatMapType = HeatMapType.Zone;
+    [Space]
     public float timeInterval = 0.5f;
-    public float dataFrameInterval = 0.1f;
+    public float dataFrameInterval = 1e-8f;
     [Space]
     public Vector2Int textureSize = new Vector2Int(100, 100);
     public Vector2Int gridSize = new Vector2Int(10, 10);
     public Vector2 previewOffset = new Vector2(0f, 0f);
     public Vector2 previewSize = new Vector2(10f, 10f);
+    [Space]
+    public Transform previewParent;
 
     [Space]
     public Slider reducedElectrificationSlider;
     public Slider electrodeDistanceSlider;
     public Slider pressureSlider;
+
+    private GameObject preview;
+    private List<List<Tuple<Vector3, float, bool>>> splitCollisionData;
+    private int currentFrameIndex = 0;
+    private float timeSinceLastFrame = 0f;
 
     void Start()
     {
@@ -34,6 +49,14 @@ public class SimulationManager : MonoBehaviour
     public void SimulationDidFinish()
     {
         Debug.Log("SIMULATION FINISHED");
+        splitCollisionData = SplitCollisionData(dataFrameInterval);
+        currentFrameIndex = 0;
+
+        if (splitCollisionData.Count > 0)
+        {
+            ParticleMap map = CollisionsToMap(splitCollisionData[0]);
+            RenderMap(map);
+        }
     }
 
     void Update()
@@ -43,24 +66,104 @@ public class SimulationManager : MonoBehaviour
             GraphCollisionsAndDistance();
         }
 
-        if (Input.GetKeyDown(KeyCode.Space))
+        timeSinceLastFrame += Time.deltaTime;
+
+        if (splitCollisionData != null && currentFrameIndex < splitCollisionData.Count && timeSinceLastFrame >= timeInterval)
         {
-            
+            List<Tuple<Vector3, float, bool>> collisions = new List<Tuple<Vector3, float, bool>>();
+
+            for (int i=0; i<=currentFrameIndex; i++)
+            {
+                collisions.AddRange(splitCollisionData[i]);
+            }
+
+            ParticleMap map = CollisionsToMap(collisions);
+            RenderMap(map);
+            currentFrameIndex++;
+            timeSinceLastFrame = 0f;
+
+            if (currentFrameIndex >= splitCollisionData.Count)
+            {
+                currentFrameIndex = 0;
+                timeSinceLastFrame = -1f;  // Pause 1 sec
+            }
         }
+
+        if (Input.GetKeyDown(KeyCode.P))
+        {
+            for (int i=0; i<Mathf.Min(100, simulator.collisionPoints.Count); i++)
+            {
+                var collision = simulator.collisionPoints[i];
+                Debug.Log($"Collision {i}: Position={collision.Item1}, Time={collision.Item2}, Ionization={collision.Item3}");
+            }
+        }
+    }
+
+    public void RenderMap(ParticleMap map)
+    {
+        if (preview != null)
+        {
+            Destroy(preview);
+        }
+
+        Texture2D texture;
+        if (heatMapType == HeatMapType.Zone)
+        {
+            List<List<float>> grid = textureRenderer.GetGridFromParticleMap(map, gridSize);
+            texture = textureRenderer.TextureFromGrid(grid, new Vector2(map.width, map.height));
+        }
+        else
+        {
+            texture = textureRenderer.TextureFromParticles(map, blur: false);
+        }
+
+        preview = textureRenderer.GetTextureGO(texture, parent: previewParent, previewSize: previewSize, offset: previewOffset);
+        preview.transform.position = new Vector3(preview.transform.position.x, preview.transform.position.y, 10f);
+    }
+
+    public ParticleMap CollisionsToMap(List<Tuple<Vector3, float, bool>> collisions)
+    {
+        ParticleMap map = new ParticleMap();
+        map.width = gridSize.x;
+        map.height = gridSize.y;
+        map.typeColors = new Dictionary<int, Color>()
+        {
+            { 0, Color.white },
+            { 1, Color.red }
+        };
+
+        map.particles = new List<int>();
+        map.particlePositions = new List<Vector2>();
+
+        foreach (var collision in collisions)
+        {
+            Vector2 pos = CollisionDataToPosition(collision);
+            pos = new Vector2(
+                pos.x / simulator.distance * gridSize.x,
+                pos.y / simulator.diameter * gridSize.y
+            );
+
+            int type = collision.Item3 ? 1 : 0;
+            map.particles.Add(type);
+            map.particlePositions.Add(pos);
+        }
+
+        return map;
     }
 
     public List<List<Tuple<Vector3, float, bool>>> SplitCollisionData(float frameInterval)
     {
         List<List<Tuple<Vector3, float, bool>>> splitData = new List<List<Tuple<Vector3, float, bool>>>();
         List<Tuple<Vector3, float, bool>> currentFrame = new List<Tuple<Vector3, float, bool>>();
-        float lastTimestamp = 0f;
+        float maxTimeStamp = frameInterval;
+        float frameMaxTime = frameInterval;
         foreach (var collision in simulator.collisionPoints)
         {
-            if (collision.Item2 - lastTimestamp > frameInterval)
+            if (collision.Item2 > frameMaxTime)
             {
                 splitData.Add(currentFrame);
                 currentFrame = new List<Tuple<Vector3, float, bool>>();
-                lastTimestamp = collision.Item2;
+                frameMaxTime += frameInterval;
             }
             currentFrame.Add(collision);
         }
@@ -68,7 +171,16 @@ public class SimulationManager : MonoBehaviour
         {
             splitData.Add(currentFrame);
         }
+
+        Debug.Log($"{splitData.Count} frames from {simulator.collisionPoints.Count} collisions with frame interval {frameInterval}s");
+
         return splitData;
+    }
+
+    public Vector2 CollisionDataToPosition(Tuple<Vector3, float, bool> collision)
+    {
+        Vector3 pos = collision.Item1;
+        return new Vector2(pos.z, pos.x);
     }
 
     public void GraphCollisionsAndDistance()
@@ -83,7 +195,7 @@ public class SimulationManager : MonoBehaviour
         List<float> dataX = new List<float>();
         List<float> dataY = new List<float>();
 
-        List<Tuple<Vector3, float>> dataSample;
+        List<Tuple<Vector3, float, bool>> dataSample;
         dataSample = new();
         int sampleSize = Mathf.Min(1000, totalCollisions);
         for (int i = 0; i < sampleSize; i++)
