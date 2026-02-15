@@ -1024,7 +1024,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4c2d2661fa899e34d923f90b7dae23d2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: '::'
-  animationSpeed: 1
+  animationSpeed: 1.5
   electron1: {fileID: 1828021242}
   neon1: {fileID: 325211777}
   neon2: {fileID: 642488458}
