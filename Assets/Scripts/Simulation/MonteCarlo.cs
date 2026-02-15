@@ -170,12 +170,12 @@ public class MonteCarlo : MonoBehaviour
                 while (!(line = sr.ReadLine()).StartsWith("-----"))
                 {
                     string[] parts = line.Split('\t');
-                    float energy = float.Parse(parts[0]);
+                    float energy = float.Parse(parts[0], System.Globalization.CultureInfo.InvariantCulture);
                     if (energy > maxEnergy)
                     {
                         maxEnergy = energy;
                     }
-                    float crossSection = float.Parse(parts[1]);
+                    float crossSection = float.Parse(parts[1], System.Globalization.CultureInfo.InvariantCulture);
                     collision.crossSections.Add(new CrossSectionMap(energy, crossSection));
                 }
                 collision.energy = collision.crossSections[0].Energy; // set energy to first energy value in cross section data
