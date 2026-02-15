@@ -20,8 +20,10 @@ public class GraphGenerator : MonoBehaviour
         }
     }
 
-    public GameObject GenerateGraph(GraphData data)
+    public GameObject GenerateGraph(GraphData data, Transform graphParent = null)
     {
+        graphParent = graphParent != null ? graphParent : this.graphParent;
+
         data.SortData();
 
         GameObject newGraph = Instantiate(graphTemplate, graphParent);
@@ -33,8 +35,8 @@ public class GraphGenerator : MonoBehaviour
         manager.SetLabelX(data.labelX);
         manager.SetLabelY(data.labelY);
 
-        Vector2 limitsX = GetSmartLimits(data.dataX, 13);
-        Vector2 limitsY = GetSmartLimits(data.dataY, 5);
+        Vector2 limitsX = GetSmartLimits(data.dataX, 13, true);
+        Vector2 limitsY = GetSmartLimits(data.dataY, 5, true);
         manager.SetGraduationsX(GetGraduationsFromData(data.dataX, 13, limitsX), format: "F1");
         manager.SetGraduationsY(GetGraduationsFromData(data.dataY, 5, limitsY), format: "F1");
 
@@ -55,6 +57,8 @@ public class GraphGenerator : MonoBehaviour
 
             float normalizedX = (dataX[i] - limitsX.x) / (limitsX.y - limitsX.x);
             float normalizedY = (dataY[i] - limitsY.x) / (limitsY.y - limitsY.x);
+
+            Debug.Log(manager.axes.rect.height);
 
             Vector2 graphRelativeZero = manager.axes.localPosition - new Vector3(manager.axes.rect.width * 0.435f, manager.axes.rect.height * 0.3675f);
             Vector2 dotPosition = new Vector2(normalizedX * manager.axes.rect.width * 0.808f, normalizedY * manager.axes.rect.height * 0.6125f) + graphRelativeZero;
@@ -81,22 +85,28 @@ public class GraphGenerator : MonoBehaviour
         }
     }
 
-    public Vector2 GetDataLimits(List<float> data)
+    public Vector2 GetDataLimits(List<float> data, bool intersectZero = false)
     {
         if (data.Count == 0) return Vector2.zero;
 
         float min = Mathf.Min(data.ToArray());
         float max = Mathf.Max(data.ToArray());
+
+        if (intersectZero && min > 0) min = 0;
+        if (intersectZero && max < 0) max = 0;
 
         return new Vector2(min, max);
     }
 
-    public Vector2 GetSmartLimits(List<float> data, int graduationCount)
+    public Vector2 GetSmartLimits(List<float> data, int graduationCount, bool intersectZero = false)
     {
         if (data.Count == 0) return Vector2.zero;
 
         float min = Mathf.Min(data.ToArray());
         float max = Mathf.Max(data.ToArray());
+
+        if (intersectZero && min > 0) min = 0;
+        if (intersectZero && max < 0) max = 0;
 
         float range = max - min;
         float optimalStep = range / (graduationCount - 1);

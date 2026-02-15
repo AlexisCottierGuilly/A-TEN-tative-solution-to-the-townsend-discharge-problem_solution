@@ -7,6 +7,7 @@ public class SimulationManager : MonoBehaviour
 {
     public MonteCarlo simulator;
     public GraphGenerator graphGenerator;
+    public GameObject graphParent;
 
     [Space]
     public Slider reducedElectrificationSlider;
@@ -32,10 +33,28 @@ public class SimulationManager : MonoBehaviour
     {
         int totalCollisions = simulator.collisionPoints.Count;
 
-        List<Tuple<Vector3, float>> dataSample;
-        //for (int i=0; i<Mathf.Min(100, ))
+        GraphData data = new GraphData();
+        data.title = "Collision Per Distance";
+        data.labelX = "Distance (mm)";
+        data.labelY = "Collisions";
 
-        Debug.Log(totalCollisions);
+        List<float> dataX = new List<float>();
+        List<float> dataY = new List<float>();
+
+        List<Tuple<Vector3, float>> dataSample;
+        dataSample = new();
+        int sampleSize = Mathf.Min(1000, totalCollisions);
+        for (int i = 0; i < sampleSize; i++)
+        {
+            int index = (int)(i * (float)totalCollisions / sampleSize);
+            dataX.Add(simulator.collisionPoints[index].Item1.z * 1000f); // convert to mm
+            dataY.Add(UnityEngine.Random.Range(0f, 1f)); // each sample point represents one collision
+        }
+
+        data.dataX = dataX;
+        data.dataY = dataY;
+
+        GameObject graph = graphGenerator.GenerateGraph(data, graphParent.transform);
     }
 
     public void ReducedElectrificationChanged() { simulator.reducedEfield = reducedElectrificationSlider.value; }

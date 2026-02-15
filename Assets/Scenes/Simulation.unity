@@ -3923,7 +3923,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: '::'
   simulator: {fileID: 239523294}
-  graphGenerator: {fileID: 0}
+  graphGenerator: {fileID: 1785756752}
+  graphParent: {fileID: 229876390}
   reducedElectrificationSlider: {fileID: 1809600055}
   electrodeDistanceSlider: {fileID: 1826686096}
   pressureSlider: {fileID: 1010157310}
