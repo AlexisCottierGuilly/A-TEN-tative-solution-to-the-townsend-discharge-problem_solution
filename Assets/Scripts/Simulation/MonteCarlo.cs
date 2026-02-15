@@ -214,7 +214,7 @@ public class MonteCarlo : MonoBehaviour
         return e;
     }
 
-    public List<Tuple<Vector3, float>> collisionPoints = new(); // list to store collision points for visualization
+    public List<Tuple<Vector3, float, bool>> collisionPoints = new(); // list to store collision points for visualization
     void SimulateElectron()
     {
         GetCollisionData();
@@ -261,7 +261,7 @@ public class MonteCarlo : MonoBehaviour
                     cumulativeProbability += density * collisions[j].GetCrossSection(currentElectron.energy) * EnergyToVelocity(currentElectron.energy) / maxFrequency; // calculate cumulative probability of collision
                     if (collisionNumber < cumulativeProbability)
                     {
-                        collisionPoints.Add(new Tuple<Vector3, float>(currentElectron.position, currentElectron.time));
+                        collisionPoints.Add(new Tuple<Vector3, float, bool>(currentElectron.position, currentElectron.time, collisions[j].isIonization)); // store collision point for visualization
                         //collision occurs, determine type of collision
                         if (!collisions[j].isIonization)
                         {
