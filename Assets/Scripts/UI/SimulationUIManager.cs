@@ -32,10 +32,13 @@ public class SimulationUIManager : MonoBehaviour
     {
         float lastY = center.y - ((elements.Count - 0.5f) * elementHeight + (elements.Count - 0.5f) * spacing);
 
+        Debug.Log($"Elements: {elements.Count}, LastY: {lastY}");
+
         elements.Add(element);
 
         if (IsGraphElement(element))
         {
+            Debug.Log($"Last Y: {lastY}");
             Transform transform = element.GetComponent<Transform>();
             transform.position = new Vector3(WorldToUIScale(center.x) * 4.5f, WorldToUIScale(lastY), transform.position.z);
         }
@@ -52,7 +55,7 @@ public class SimulationUIManager : MonoBehaviour
         float scrollTime = scrollState * 0.25f;
         for (int i=0; i < scrollState; i++)
         {
-            ScrollDown(scrollTime);
+            ScrollDown(scrollTime, onlyFirst: true);
         }
 
         if (elements.Contains(element))
@@ -69,7 +72,7 @@ public class SimulationUIManager : MonoBehaviour
         return elements[scrollState];
     }
 
-    void ScrollUp(float time = 0.25f)
+    void ScrollUp(float time = 0.25f, bool onlyFirst=false)
     {
         if (scrollState >= elements.Count - 1)
             return;
@@ -81,11 +84,11 @@ public class SimulationUIManager : MonoBehaviour
         if (visibleElement != null)
         {
             float scrollDistance = elementHeight + spacing;
-            StartCoroutine(MoveAllElements(scrollDistance, time));
+            StartCoroutine(MoveAllElements(scrollDistance, time, onlyFirst));
         }
     }
 
-    void ScrollDown(float time = 0.25f)
+    void ScrollDown(float time = 0.25f, bool onlyFirst=false)
     {
         if (scrollState <= 0)
             return;
@@ -96,11 +99,11 @@ public class SimulationUIManager : MonoBehaviour
         if (visibleElement != null)
         {
             float scrollDistance = elementHeight + spacing;
-            StartCoroutine(MoveAllElements(-scrollDistance, time));
+            StartCoroutine(MoveAllElements(-scrollDistance, time, onlyFirst));
         }
     }
 
-    IEnumerator MoveAllElements(float distance, float time = 0.25f)
+    IEnumerator MoveAllElements(float distance, float time = 0.25f, bool onlyFirst=false)
     {
         // foreach (GameObject element in elements)
         // {
@@ -134,6 +137,9 @@ public class SimulationUIManager : MonoBehaviour
                 {
                     element.GetComponent<Transform>().position += new Vector3(0, distance * usedDeltaTime / time, 0);
                 }
+
+                if (onlyFirst == true)
+                    break;
             }
 
             elapsedTime += Time.deltaTime;

@@ -39,6 +39,7 @@ public class SimulationManager : MonoBehaviour
     private GameObject preview;
     private GameObject graph1;
     private GameObject graph2;
+    private GameObject graph3;
     
     public int numFrames = 100;
     float frameInterval = 0f;
@@ -88,6 +89,12 @@ public class SimulationManager : MonoBehaviour
             Destroy(graph2);
         }
 
+        if (graph3 != null)
+        {
+            uiManager.RemoveFromElements(graph3);
+            Destroy(graph3);
+        }
+
         GraphData data1 = GetCollisionAndDistanceData();
         graph1 = GraphCollisionsAndDistance(data1);
         uiManager.AddToElements(graph1);
@@ -95,6 +102,9 @@ public class SimulationManager : MonoBehaviour
         GraphData linearizedData = GetLinearizedCollisionData(data1);
         graph2 = graphGenerator.GenerateGraph(linearizedData, graphParent.transform);
         uiManager.AddToElements(graph2);
+
+        graph3 = GraphEnergyAndTime();
+        uiManager.AddToElements(graph3);
     }
 
     public void SimulationDidStart()
@@ -339,8 +349,9 @@ public class SimulationManager : MonoBehaviour
         List<float> dataX = new List<float>();
         List<float> dataY = new List<float>();
 
-        for (int i = 0; i < numFrames; i++)
+        for (int i = 0; i < (int)(numFrames / 2); i++)
         {
+            i *= 2;
             float averageTime = 0f;
             float averageEnergy = 0f;
             for (int j = 0; j < splitCollisionData[i].Count; j++)
@@ -348,8 +359,18 @@ public class SimulationManager : MonoBehaviour
                 averageTime += splitCollisionData[i][j].time;
                 averageEnergy += splitCollisionData[i][j].energy;
             }
-            averageTime /= splitCollisionData[i].Count;
-            averageEnergy /= splitCollisionData[i].Count;
+
+            for (int j = 0; j < splitCollisionData[i + 1].Count; j++)
+            {
+                averageTime += splitCollisionData[i + 1][j].time;
+                averageEnergy += splitCollisionData[i + 1][j].energy;
+            }
+
+            int dataCount = splitCollisionData[i].Count;
+            dataCount += splitCollisionData[i + 1].Count;
+
+            averageTime /= dataCount;
+            averageEnergy /= dataCount;
             dataX.Add(averageTime);
             dataY.Add(averageEnergy);
         }
