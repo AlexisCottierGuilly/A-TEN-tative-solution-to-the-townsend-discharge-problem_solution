@@ -75,7 +75,7 @@ public class TextureRenderer : MonoBehaviour
         return textureGO;
     }
 
-    public Texture2D TextureFromParticles(ParticleMap map)
+    public Texture2D TextureFromParticles(ParticleMap map, bool blur = true, bool white = false)
     {
         Texture2D texture = new Texture2D(map.width, map.height, TextureFormat.RGBA32, false);
         texture.filterMode = FilterMode.Point;
@@ -89,21 +89,30 @@ public class TextureRenderer : MonoBehaviour
 
         texture.SetPixels(pixels);
 
+        int j = 0;
         foreach (Vector2 particlePos in map.particlePositions)
         {
             int x = Mathf.Clamp(Mathf.RoundToInt(particlePos.x), 0, map.width - 1);
             int y = Mathf.Clamp(Mathf.RoundToInt(particlePos.y), 0, map.height - 1);
-            BlurPoint(x, y, texture);
+            
+            Color color = white ? Color.white : map.typeColors[map.particles[j]];
+
+            if (blur)
+                BlurPoint(x, y, color, texture);
+            else
+                texture.SetPixel(x, y, color);
+            
+            j++;
         }
 
         texture.Apply();
         return texture;
     }
 
-    public void BlurPoint(float x, float y, Texture2D texture)
+    public void BlurPoint(float x, float y, Color color, Texture2D texture)
     {
-        Color mainColor = Color.white;
-        Color secondaryColor = Color.grey;
+        Color mainColor = color;
+        Color secondaryColor = color * 0.5f;
 
         texture.SetPixel((int)x, (int)y, mainColor);
         
@@ -277,6 +286,11 @@ public class TextureRenderer : MonoBehaviour
 
         foreach (Vector2 particlePos in map.particlePositions)
         {
+            if (particlePos.x < 0 || particlePos.x >= map.width || particlePos.y < 0 || particlePos.y >= map.height)
+            {
+                continue;
+            }
+
             Vector2 particleGridPos = new Vector2(
                 particlePos.x / map.width * (gridSize.x - 1),
                 particlePos.y / map.height * (gridSize.y - 1)

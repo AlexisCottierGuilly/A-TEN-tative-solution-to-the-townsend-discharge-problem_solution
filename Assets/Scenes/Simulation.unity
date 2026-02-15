@@ -1070,6 +1070,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1d90b669628e4dc498a751220411babf, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MonteCarlo
+  simulationManager: {fileID: 1224973116}
   maxCollisions: 20000
   numElectrons: 1
   reducedEfield: 100
@@ -2176,7 +2177,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bf8e9d796985eb541bea69ee0444e52c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: '::'
-  enableTest: 1
+  enableTest: 0
   textureSize: {x: 555, y: 300}
   gridSize: {x: 111, y: 60}
   offset: {x: 3.2, y: 0}
@@ -3923,8 +3924,17 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: '::'
   simulator: {fileID: 239523294}
+  textureRenderer: {fileID: 522649958}
   graphGenerator: {fileID: 1785756752}
   graphParent: {fileID: 229876390}
+  heatMapType: 0
+  timeInterval: 0.025
+  dataFrameInterval: 0.000000001
+  textureSize: {x: 555, y: 300}
+  gridSize: {x: 111, y: 60}
+  previewOffset: {x: 0.04, y: 0}
+  previewSize: {x: 233.1, y: 126}
+  previewParent: {fileID: 1809678123}
   reducedElectrificationSlider: {fileID: 1809600055}
   electrodeDistanceSlider: {fileID: 1826686096}
   pressureSlider: {fileID: 1010157310}
