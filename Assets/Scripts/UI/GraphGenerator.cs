@@ -58,8 +58,6 @@ public class GraphGenerator : MonoBehaviour
             float normalizedX = (dataX[i] - limitsX.x) / (limitsX.y - limitsX.x);
             float normalizedY = (dataY[i] - limitsY.x) / (limitsY.y - limitsY.x);
 
-            Debug.Log(manager.axes.rect.height);
-
             Vector2 graphRelativeZero = manager.axes.localPosition - new Vector3(manager.axes.rect.width * 0.435f, manager.axes.rect.height * 0.3675f);
             Vector2 dotPosition = new Vector2(normalizedX * manager.axes.rect.width * 0.808f, normalizedY * manager.axes.rect.height * 0.6125f) + graphRelativeZero;
             RectTransform rt = dot.GetComponent<RectTransform>();

@@ -14,6 +14,7 @@ public class SimulationManager : MonoBehaviour
     public MonteCarlo simulator;
     public TextureRenderer textureRenderer;
     public GraphGenerator graphGenerator;
+    public SimulationUIManager uiManager;
     public GameObject graphParent;
 
     [Header("Simulation Render")]
@@ -34,12 +35,14 @@ public class SimulationManager : MonoBehaviour
     public Slider pressureSlider;
 
     private GameObject preview;
+    private GameObject graph;
     
     public int numFrames = 100;
     float frameInterval = 0f;
     public int currentFrame = 0;
     float timeSinceLastFrame = 0f;
     public int numSlices = 10;
+    private GameObject graph;
     private List<List<Electron>> splitCollisionData;
     private int currentFrameIndex = 0;
 
@@ -69,15 +72,28 @@ public class SimulationManager : MonoBehaviour
             ParticleMap map = CollisionsToMap(splitCollisionData[0]);
             RenderMap(map);
         }
+
+        if (graph != null)
+        {
+            uiManager.removeFromElements(graph);
+            Destroy(graph);
+        }
+
+        graph = GraphCollisionsAndDistance();
+        uiManager.AddToElements(graph);
+    }
+
+    public void SimulationDidStart()
+    {
+        Debug.Log("SIMULATION STARTED");
+        if (preview != null)
+        {
+            Destroy(preview);
+        }
     }
 
     void Update()
     {
-        if (Input.GetKeyUp(KeyCode.G))
-        {
-            GraphCollisionsAndDistance();
-        }
-
         timeSinceLastFrame += Time.deltaTime;
 
         if (splitCollisionData != null && currentFrameIndex < splitCollisionData.Count && timeSinceLastFrame >= timeInterval)
@@ -182,7 +198,7 @@ public class SimulationManager : MonoBehaviour
         }
     }
 
-    public void GraphCollisionsAndDistance()
+    public GameObject GraphCollisionsAndDistance()
     {
         int totalCollisions = simulator.collisionPoints.Count;
 
@@ -225,6 +241,8 @@ public class SimulationManager : MonoBehaviour
         Debug.Log("Linear fit: ln(Collisions) = " + fit.Item1.ToString("F4") + " * Distance + " + fit.Item2.ToString("F4") + " with R^2 = " + fit.Item3.ToString("F4"));
 
         GameObject graph = graphGenerator.GenerateGraph(data, graphParent.transform);
+
+        return graph;
     }
 
     public Tuple<float, float, float> LinearRegression(List<float> x, List<float> y)
@@ -282,8 +300,7 @@ public class SimulationManager : MonoBehaviour
         data.dataY = dataY;
 
         GameObject graph = graphGenerator.GenerateGraph(data, graphParent.transform);
-
-        return 0f;
+        return graph;
     }
 
     public void ReducedElectrificationChanged() { simulator.reducedEfield = reducedElectrificationSlider.value; }
