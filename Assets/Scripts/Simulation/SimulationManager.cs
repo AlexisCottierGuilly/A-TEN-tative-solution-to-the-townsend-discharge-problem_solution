@@ -20,7 +20,8 @@ public class SimulationManager : MonoBehaviour
     [Header("Simulation Render")]
     public HeatMapType heatMapType = HeatMapType.Zone;
     [Space]
-    public float timeInterval = 0.5f;
+    public float timeInterval = 0.01f;
+    public float timeFrameInterval = 2e-8f;
     [Space]
     public Vector2Int textureSize = new Vector2Int(100, 100);
     public Vector2Int gridSize = new Vector2Int(10, 10);
@@ -63,6 +64,7 @@ public class SimulationManager : MonoBehaviour
 
         splitCollisionData = new List<List<Electron>>();
         SplitCollisionData();
+        Debug.Log($"Splits: {splitCollisionData.Count} frames with intervals of {frameInterval} seconds");
         currentFrameIndex = 0;
         timeSinceLastFrame = 0f;
 
@@ -144,8 +146,8 @@ public class SimulationManager : MonoBehaviour
     public ParticleMap CollisionsToMap(List<Electron> collisions)
     {
         ParticleMap map = new ParticleMap();
-        map.width = gridSize.x;
-        map.height = gridSize.y;
+        map.width = textureSize.x;
+        map.height = textureSize.y;
         map.typeColors = new Dictionary<int, Color>()
         {
             { 0, Color.white },
@@ -157,12 +159,14 @@ public class SimulationManager : MonoBehaviour
 
         foreach (var collision in collisions)
         {
-            Vector2 pos = new Vector2(collision.position.x, collision.position.z);
+            Vector2 initialPos = new Vector2(collision.position.x, collision.position.z);
             //convert to between 0 and 1
-            pos.x = (pos.x + simulator.diameter / 2f) / simulator.diameter * textureSize.x;
-            pos.y = pos.y / simulator.distance * gridSize.y * textureSize.y;
+            Vector2 pos = new Vector2(
+                (initialPos.x) / initialDistance * textureSize.x,
+                (initialPos.y + initialDiameter / 2f) / initialDiameter * textureSize.y
+            );
 
-            int type = 1;//TODO: collision.Item3 ? 1 : 0;
+            int type = 0;//TODO: collision.Item3 ? 1 : 0;
             map.particles.Add(type);
             map.particlePositions.Add(pos);
         }

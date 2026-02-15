@@ -48,7 +48,7 @@ public class SimulationUIManager : MonoBehaviour
         if (IsGraphElement(element))
         {
             Transform transform = element.GetComponent<Transform>();
-            lastY -= UIToWorldScale(element.GetComponent<GraphManager>().axes.rect.height) * 5f;
+            lastY -= UIToWorldScale(element.GetComponent<GraphManager>().axes.rect.height) * 2.75f;
             transform.position = new Vector3(WorldToUIScale(center.x) * 4.5f, WorldToUIScale(lastY), transform.position.z);
         }
         else if (IsWorldElement(element))

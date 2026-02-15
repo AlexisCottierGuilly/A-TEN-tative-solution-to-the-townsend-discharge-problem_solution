@@ -555,9 +555,9 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 239523294}
-        m_TargetAssemblyTypeName: MonteCarlo, Assembly-CSharp
-        m_MethodName: RunSimulation
+      - m_Target: {fileID: 1224973116}
+        m_TargetAssemblyTypeName: SimulationManager, Assembly-CSharp
+        m_MethodName: SimulationDidStart
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -567,9 +567,9 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
-      - m_Target: {fileID: 1224973116}
-        m_TargetAssemblyTypeName: SimulationManager, Assembly-CSharp
-        m_MethodName: SimulationDidStart
+      - m_Target: {fileID: 239523294}
+        m_TargetAssemblyTypeName: MonteCarlo, Assembly-CSharp
+        m_MethodName: RunSimulation
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -2189,7 +2189,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bf8e9d796985eb541bea69ee0444e52c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: '::'
-  enableTest: 1
+  enableTest: 0
   textureSize: {x: 555, y: 300}
   gridSize: {x: 111, y: 60}
   offset: {x: 3.2, y: 0}
@@ -3941,12 +3941,13 @@ MonoBehaviour:
   uiManager: {fileID: 1451318876}
   graphParent: {fileID: 229876390}
   heatMapType: 0
-  timeInterval: 0.5
-  textureSize: {x: 100, y: 100}
-  gridSize: {x: 10, y: 10}
-  previewOffset: {x: 0, y: 0}
-  previewSize: {x: 10, y: 10}
-  previewParent: {fileID: 0}
+  timeInterval: 0.01
+  timeFrameInterval: 0.00000002
+  textureSize: {x: 555, y: 300}
+  gridSize: {x: 111, y: 60}
+  previewOffset: {x: 0.04, y: 0}
+  previewSize: {x: 233.1, y: 126}
+  previewParent: {fileID: 1809678123}
   reducedElectrificationSlider: {fileID: 1809600055}
   electrodeDistanceSlider: {fileID: 1826686096}
   pressureSlider: {fileID: 1010157310}
