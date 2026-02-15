@@ -62,7 +62,7 @@ public class InteractiveAnimator : MonoBehaviour
     public void AnimationSpeedToggled()
     {
         if (animationSpeed == initialAnimationSpeed)
-            animationSpeed /= 3f;
+            animationSpeed /= 5f;
         else
             animationSpeed = initialAnimationSpeed;
     }
@@ -96,10 +96,10 @@ public class InteractiveAnimator : MonoBehaviour
 
     public IEnumerator AnimateSequence()
     {
-        StartCoroutine(AnimateVibration(neon1, amplitude: 0.05f, frequency: 3f, duration: 100000f / animationSpeed));
-        StartCoroutine(AnimateVibration(neon2, amplitude: 0.05f, frequency: 2.8f, duration: 100000f / animationSpeed));
-        StartCoroutine(AnimateVibration(neon3, amplitude: 0.05f, frequency: 3.2f, duration: 100000f / animationSpeed));
-        StartCoroutine(AnimateVibration(neon4, amplitude: 0.05f, frequency: 3.3f, duration: 100000f / animationSpeed));
+        StartCoroutine(AnimateVibration(neon1, amplitude: 0.05f, frequency: 3f, duration: 100000f));
+        StartCoroutine(AnimateVibration(neon2, amplitude: 0.05f, frequency: 2.8f, duration: 100000f));
+        StartCoroutine(AnimateVibration(neon3, amplitude: 0.05f, frequency: 3.2f, duration: 100000f));
+        StartCoroutine(AnimateVibration(neon4, amplitude: 0.05f, frequency: 3.3f, duration: 100000f));
 
         yield return AnimateMovement(electron1, new Vector2(11.3f, 0f), 15f * animationSpeed);
         yield return AnimateMovement(electron1, new Vector2(1.15f, 2.6f), 15f * animationSpeed);
@@ -152,7 +152,7 @@ public class InteractiveAnimator : MonoBehaviour
             float offsetX = Mathf.Sin(elapsed * frequency * 2f * Mathf.PI) * amplitude;
             float offsetY = Mathf.Sin((elapsed + 0.25f) * frequency * 2f * Mathf.PI * 1.5f) * amplitude;
             particle.transform.localPosition = originalPos + new Vector2(offsetX, offsetY);
-            elapsed += Time.deltaTime;
+            elapsed += Time.deltaTime * animationSpeed;
             yield return null;
         }
         particle.transform.localPosition = originalPos;
