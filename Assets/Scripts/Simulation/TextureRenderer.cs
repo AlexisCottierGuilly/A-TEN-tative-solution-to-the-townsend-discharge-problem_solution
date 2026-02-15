@@ -286,6 +286,11 @@ public class TextureRenderer : MonoBehaviour
 
         foreach (Vector2 particlePos in map.particlePositions)
         {
+            if (particlePos.x < 0 || particlePos.x >= map.width || particlePos.y < 0 || particlePos.y >= map.height)
+            {
+                continue;
+            }
+
             Vector2 particleGridPos = new Vector2(
                 particlePos.x / map.width * (gridSize.x - 1),
                 particlePos.y / map.height * (gridSize.y - 1)

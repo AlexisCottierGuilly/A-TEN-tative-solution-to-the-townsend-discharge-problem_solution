@@ -39,6 +39,9 @@ public class SimulationManager : MonoBehaviour
     private int currentFrameIndex = 0;
     private float timeSinceLastFrame = 0f;
 
+    private float initialDistance;
+    private float initialDiameter;
+
     void Start()
     {
         ReducedElectrificationChanged();
@@ -49,6 +52,9 @@ public class SimulationManager : MonoBehaviour
     public void SimulationDidFinish()
     {
         Debug.Log("SIMULATION FINISHED");
+        initialDistance = simulator.distance;
+        initialDiameter = simulator.diameter;
+
         splitCollisionData = SplitCollisionData(dataFrameInterval);
         currentFrameIndex = 0;
 
@@ -139,8 +145,8 @@ public class SimulationManager : MonoBehaviour
         {
             Vector2 pos = CollisionDataToPosition(collision);
             pos = new Vector2(
-                pos.x / simulator.distance * gridSize.x,
-                pos.y / simulator.diameter * gridSize.y
+                pos.x / initialDistance * gridSize.x,
+                pos.y / initialDiameter * gridSize.y
             );
 
             int type = collision.Item3 ? 1 : 0;

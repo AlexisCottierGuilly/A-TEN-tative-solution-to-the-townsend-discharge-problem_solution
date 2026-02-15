@@ -3927,8 +3927,8 @@ MonoBehaviour:
   textureRenderer: {fileID: 522649958}
   graphGenerator: {fileID: 1785756752}
   graphParent: {fileID: 229876390}
-  heatMapType: 1
-  timeInterval: 0.02
+  heatMapType: 0
+  timeInterval: 0.025
   dataFrameInterval: 0.000000001
   textureSize: {x: 555, y: 300}
   gridSize: {x: 111, y: 60}
