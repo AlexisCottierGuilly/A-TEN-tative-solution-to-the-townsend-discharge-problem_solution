@@ -214,16 +214,19 @@ public class SimulationManager : MonoBehaviour
             float sliceStart = i * simulator.distance / numSlices;
             float sliceEnd = (i + 1) * simulator.distance / numSlices;
 
-            dataX.Add((sliceStart + sliceEnd) / 2f * 1000f); // convert to mm
+            float averageX = 0f;
             int collisionsInSlice = 0;
             foreach (Electron collision in simulator.collisionPoints)
             {
-                float z = collision.position.z;
-                if (z >= sliceStart && z < sliceEnd)
-                {
+                float x = collision.position.x;
+                if (x >= sliceStart && x < sliceEnd)
+                {   
+                    averageX += x;
                     collisionsInSlice++;
                 }
             }
+            averageX /= collisionsInSlice > 0 ? collisionsInSlice : 1;
+            dataX.Add(averageX * 1000f); // convert to mm
             dataY.Add(collisionsInSlice);
         }
 
@@ -285,13 +288,16 @@ public class SimulationManager : MonoBehaviour
 
         for (int i = 0; i < numFrames; i++)
         {
-            dataX.Add(i * frameInterval);
+            float averageTime = 0f;
             float averageEnergy = 0f;
             for (int j = 0; j < splitCollisionData[i].Count; j++)
             {
+                averageTime += splitCollisionData[i][j].time;
                 averageEnergy += splitCollisionData[i][j].energy;
             }
+            averageTime /= splitCollisionData[i].Count;
             averageEnergy /= splitCollisionData[i].Count;
+            dataX.Add(averageTime);
             dataY.Add(averageEnergy);
         }
 
