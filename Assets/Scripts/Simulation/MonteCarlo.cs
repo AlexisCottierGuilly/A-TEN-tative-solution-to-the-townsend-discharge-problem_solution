@@ -153,43 +153,6 @@ public class MonteCarlo : MonoBehaviour
     void GetCollisionData()
     {
         //read collision data from cross section files
-        /*string path = Path.Combine(Application.streamingAssetsPath, "cross_sections.txt");
-        FileStream fs = new(path, FileMode.Open, FileAccess.Read);
-        StreamReader sr = new(fs);
-        collisions = new();
-        while (!sr.EndOfStream)
-        {
-            //skip until line is ELASTIC, EXCITATION, or IONIZATION
-            string line = sr.ReadLine();
-            if (line.StartsWith("ELASTIC") || line.StartsWith("EXCITATION") || line.StartsWith("IONIZATION"))
-            {
-                Collision collision = new();
-                collision.isIonization = line.StartsWith("IONIZATION");
-                //skip until dashed line
-                while (!line.StartsWith("-----"))
-                {
-                    line = sr.ReadLine();
-                }
-                //read next lines for cross section until we hit a dashed line
-                collision.crossSections = new();
-                while (!(line = sr.ReadLine()).StartsWith("-----"))
-                {
-                    string[] parts = line.Split('\t');
-                    float energy = float.Parse(parts[0], System.Globalization.CultureInfo.InvariantCulture);
-                    if (energy > maxEnergy)
-                    {
-                        maxEnergy = energy;
-                    }
-                    float crossSection = float.Parse(parts[1], System.Globalization.CultureInfo.InvariantCulture);
-                    collision.crossSections.Add(new CrossSectionMap(energy, crossSection));
-                }
-                collision.energy = collision.crossSections[0].Energy; // set energy to first energy value in cross section data
-                collisions.Add(collision);
-            }
-        }*/
-
-        // Same but using the crossSectionsData string instead of reading from a file
-
         collisions = new();
         TextAsset file = Resources.Load<TextAsset>("cross_sections");
         string[] lines = file.text.Split('\n');
