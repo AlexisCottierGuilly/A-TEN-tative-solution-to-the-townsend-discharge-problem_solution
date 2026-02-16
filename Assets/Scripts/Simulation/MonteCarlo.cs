@@ -51,6 +51,7 @@ public struct Electron
     public float energy; // kinetic energy in eV
     public int order;
     public float time;
+    public bool isIonization;
 }
 
 class PCG
@@ -152,7 +153,8 @@ public class MonteCarlo : MonoBehaviour
     void GetCollisionData()
     {
         //read collision data from cross section files
-        FileStream fs = new("Assets/Data/cross_sections.txt", FileMode.Open, FileAccess.Read);
+        /*string path = Path.Combine(Application.streamingAssetsPath, "cross_sections.txt");
+        FileStream fs = new(path, FileMode.Open, FileAccess.Read);
         StreamReader sr = new(fs);
         collisions = new();
         while (!sr.EndOfStream)
@@ -184,6 +186,50 @@ public class MonteCarlo : MonoBehaviour
                 collision.energy = collision.crossSections[0].Energy; // set energy to first energy value in cross section data
                 collisions.Add(collision);
             }
+        }*/
+
+        // Same but using the crossSectionsData string instead of reading from a file
+
+        collisions = new();
+        TextAsset file = Resources.Load<TextAsset>("cross_sections");
+        string[] lines = file.text.Split('\n');
+        Debug.Log($"Lines: {lines.Length}");
+
+        int index = 0;
+        while (index < lines.Length)
+        {
+            string line = lines[index];
+            if (line.StartsWith("ELASTIC") || line.StartsWith("EXCITATION") || line.StartsWith("IONIZATION"))
+            {
+                Collision collision = new();
+                collision.isIonization = line.StartsWith("IONIZATION");
+                //skip until dashed line
+                while (!line.StartsWith("-----"))
+                {
+                    index++;
+                    line = lines[index];
+                }
+                //read next lines for cross section until we hit a dashed line
+                collision.crossSections = new();
+                index++;
+                line = lines[index];
+                while (!line.StartsWith("-----"))
+                {
+                    string[] parts = line.Split('\t');
+                    float energy = float.Parse(parts[0], System.Globalization.CultureInfo.InvariantCulture);
+                    if (energy > maxEnergy)
+                    {
+                        maxEnergy = energy;
+                    }
+                    float crossSection = float.Parse(parts[1], System.Globalization.CultureInfo.InvariantCulture);
+                    collision.crossSections.Add(new CrossSectionMap(energy, crossSection));
+                    index++;
+                    line = lines[index];
+                }
+                collision.energy = collision.crossSections[0].Energy; // set energy to first energy value in cross section data
+                collisions.Add(collision);
+            }
+            index++;
         }
     }
 
@@ -260,7 +306,9 @@ public class MonteCarlo : MonoBehaviour
                     if (collisionNumber < cumulativeProbability)
                     {
                         collisionCount++;
+                        currentElectron.isIonization = collisions[j].isIonization;
                         collisionPoints.Add(currentElectron); // store collision point for visualization
+                        currentElectron.isIonization = false;
                         //collision occurs
                         currentElectron.energy -= collisions[j].energy; // subtract energy lost in collision
                         if (collisions[j].isIonization)

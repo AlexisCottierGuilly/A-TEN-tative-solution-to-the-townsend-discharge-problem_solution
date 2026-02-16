@@ -1351,7 +1351,7 @@ MonoBehaviour:
     - 0.319
     - 0.4865
     - 0.484
-  offset: {x: 20, y: 0}
+  offset: {x: 20, y: -10}
 --- !u!1 &463236156
 GameObject:
   m_ObjectHideFlags: 0
@@ -1911,7 +1911,7 @@ MonoBehaviour:
   graphGenerator: {fileID: 1955877016}
   graphParent: {fileID: 1181197311}
   testData:
-    title: 'Graph 1 : Townsend Coefficient as a Function of the Pressure'
+    title: 'Graph 2 : Townsend Coefficient as a Function of the Pressure'
     labelX: Pressure (Torr)
     labelY: Townsend Coefficient
     visibleSlope: 0
@@ -1937,7 +1937,7 @@ MonoBehaviour:
     - 0.3072
     - 0.3511
     - 0.4718
-  offset: {x: 1020, y: 0}
+  offset: {x: 1020, y: -10}
 --- !u!4 &596420980
 Transform:
   m_ObjectHideFlags: 0

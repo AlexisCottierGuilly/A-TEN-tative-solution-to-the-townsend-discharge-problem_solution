@@ -485,6 +485,7 @@ GameObject:
   - component: {fileID: 124711330}
   - component: {fileID: 124711329}
   - component: {fileID: 124711328}
+  - component: {fileID: 124711331}
   m_Layer: 5
   m_Name: Play
   m_TagString: Untagged
@@ -617,6 +618,19 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 124711326}
   m_CullTransparentMesh: 1
+--- !u!114 &124711331
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 124711326}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7f098c74da778fb41a75fbf5dea0dbb9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: '::'
+  enabled: 1
 --- !u!1 &156138719
 GameObject:
   m_ObjectHideFlags: 0
@@ -3494,7 +3508,7 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
-  m_IsOn: 0
+  m_IsOn: 1
 --- !u!1 &893200787
 GameObject:
   m_ObjectHideFlags: 0
@@ -4333,7 +4347,7 @@ MonoBehaviour:
   graphGenerator: {fileID: 1785756752}
   uiManager: {fileID: 1451318876}
   graphParent: {fileID: 229876390}
-  heatMapType: 0
+  heatMapType: 1
   cumulative: 1
   timeInterval: 0.02
   timeFrameInterval: 0.00000004
@@ -5184,8 +5198,8 @@ MonoBehaviour:
   canvas: {fileID: 229876393}
   elements:
   - {fileID: 1809678121}
-  spacing: 7.5
-  elementHeight: 3.5
+  spacing: 8
+  elementHeight: 2
   scaleFactor: 40
   center: {x: 2.95, y: 0}
 --- !u!4 &1451318877

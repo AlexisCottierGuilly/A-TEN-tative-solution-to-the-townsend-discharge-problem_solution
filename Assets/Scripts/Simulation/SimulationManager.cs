@@ -206,7 +206,7 @@ public class SimulationManager : MonoBehaviour
                 (initialPos.y + initialDiameter / 2f) / initialDiameter * textureSize.y
             );
 
-            int type = 0;//TODO: collision.Item3 ? 1 : 0;
+            int type = collision.isIonization ? 1 : 0;
             map.particles.Add(type);
             map.particlePositions.Add(pos);
         }
